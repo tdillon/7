@@ -1,0 +1,25 @@
+{
+  "name": "7",
+  "version": "1.0.0",
+  "description": "A seven segment display geometry library for Javascript.",
+  "main": "7.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tdillon/7.git"
+  },
+  "keywords": [
+    "javascript",
+    "seven",
+    "segment",
+    "display"
+  ],
+  "author": "Travis Dillon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tdillon/7/issues"
+  },
+  "homepage": "https://github.com/tdillon/7#readme"
+}
