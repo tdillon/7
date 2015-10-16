@@ -1,7 +1,7 @@
 {
-  "name": "7",
+  "name": "seven-segment",
   "version": "1.0.0",
-  "description": "A seven segment display geometry library for Javascript.",
+  "description": "A seven segment display geometry library for JavaScript.",
   "main": "7.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,9 +12,7 @@
   },
   "keywords": [
     "javascript",
-    "seven",
-    "segment",
-    "display"
+    "seven segment display"
   ],
   "author": "Travis Dillon",
   "license": "MIT",
