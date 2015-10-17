@@ -1,6 +1,6 @@
 {
   "name": "seven-segment",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A seven segment display geometry library for JavaScript.",
   "main": "7.js",
   "scripts": {
