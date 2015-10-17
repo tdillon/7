@@ -19,5 +19,6 @@
   "bugs": {
     "url": "https://github.com/tdillon/7/issues"
   },
-  "homepage": "https://github.com/tdillon/7#readme"
+  "homepage": "https://github.com/tdillon/7#readme",
+  "format": "es6"
 }
