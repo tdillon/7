@@ -3,6 +3,14 @@ export interface Point {
   y:number;
 }
 
+export interface SevenConfig {
+  SegmentLength?:number;
+  Angle?:number;
+  ratioLtoW?:number;
+  RatioLtoS?:number;
+  Value?:number;
+}
+
 export enum SegmentType { A, B, C, D, E, F, G }
 
 export class Segment {
@@ -39,19 +47,22 @@ export class Seven {
   ];
 
   //these are for public getters/setters
+  //TODO explain each of these as needed
   private _angleDegree:number;
-  private _ratioLtoH:number;
+  private _ratioLtoW:number;
   private _ratioLtoS:number;
   private _segmentLength:number;
+  private _segmentHorizontalShiftDistance:number;
 
   //these are for public getters
+  //TODO explain each of these as needed
   private _height:number;
   private _width:number;
 
+  //TODO explain each of these as needed
   private _angleRadian:number;
   private _spacing:number;
   private _halfWidth:number;
-  private _segmentWidth:number;
   segments:Array<Segment> = [
     new Segment(SegmentType.A),
     new Segment(SegmentType.B),
@@ -63,11 +74,12 @@ export class Seven {
   ];
   value;
 
-  constructor({SegmentLength = 50, Angle = 10, RatioLtoH = 4, RatioLtoS = 32, Value = 7}: {SegmentLength?:number; Angle?:number; RatioLtoH?:number; RatioLtoS?:number; Value?:number} = {}) {
+  constructor({SegmentLength = 50, Angle = 10, ratioLtoW = 4, RatioLtoS = 32, Value = 7}: SevenConfig = {}) {
+    //TODO object could be constructed with wacky values, handle for that.
     this._angleDegree = Angle;
     this.value = Value;
     this._segmentLength = SegmentLength;
-    this._ratioLtoH = RatioLtoH;
+    this._ratioLtoW = ratioLtoW;
     this._ratioLtoS = RatioLtoS;
 
     this._positionSegments();
@@ -91,21 +103,49 @@ export class Seven {
   }
 
   /**
-   * TODO explain the position of the points in the array
+   * This method sets the following values for the object.
+   * _angleRadian, _spacing, _halfWidth, _height, _width
+   *
+   * This method populates the _horizontalSegmentGeometry array.
+   * The array contains the six points of the horizontal segment's geometry.
+   * The first element in the array is the left most point.
+   * The points are then listed in clockwise order.
+   * The first point is always at the origin (0,0).
+   * The fourth point is always at (l, 0). where l is the segment length
+   *
+   * This method populates the _verticalSegmentGeometry array.
+   * The array contains the six points of the vertical segment's geometry.
+   * The first element in the array is the top most point.
+   * The points are then listed in clockwise order.
+   * The first point is always at the origin (0,0).
+   * The fourth point is always at (0, l). where l is the segment length
+   *
+   * This method throws an error if the calculated geometry is unexpected.
+   *
    * @private
    */
   private _calculateSegmentGeometry() {
     this._angleRadian = this._angleDegree * Math.PI / 180;
     this._spacing = (this.ratioLtoS === 0 ? 0 : this.segmentLength / this.ratioLtoS);
-    this._segmentWidth = this.segmentLength / this.ratioLtoH;
-    this._halfWidth = this._segmentWidth / 2;
-    const segmentEndAngle = Math.atan(Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian))); //TODO what angle is this?
-    this._height = this._segmentWidth + 2 * this.segmentLength * Math.cos(this._angleRadian) + this._spacing * (Math.sin(segmentEndAngle) + Math.cos(segmentEndAngle)) + this._spacing * (Math.sin(segmentEndAngle) + Math.cos(segmentEndAngle)) + 3;
-    this._width = this._segmentWidth + this.segmentLength + 2 * this.segmentLength * Math.sin(this._angleRadian) + this._spacing * Math.cos(segmentEndAngle) + this._spacing * Math.cos(segmentEndAngle) + 3;
+    const _segmentWidth = this.segmentLength / this.ratioLtoW;
+    this._halfWidth = _segmentWidth / 2;
+    const segmentEndAngle = Math.atan(Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian))); //TODO what angle is this?, i believe this is the 90deg - the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis.  TODO think of a cleaner way to say that.
+    this._segmentHorizontalShiftDistance = ((this._halfWidth / Math.sin(Math.PI / 2 - segmentEndAngle)) * Math.sin((Math.PI / 2 - segmentEndAngle) - this._angleRadian));  //TODO explain this mess
+    //TODO explain height calculation, line by line
+    this._height = _segmentWidth +
+      2 * this.segmentLength * Math.cos(this._angleRadian) +
+      2 * this._spacing * (Math.sin(segmentEndAngle) + Math.cos(segmentEndAngle));
+    //TODO explain width calculation, line by line
+    this._width = //TODO width number don't appear correct for negative values, probably _segmentHorizontalShiftDistance needs cos instead of sin
+      2 * this._segmentHorizontalShiftDistance +
+      this.segmentLength +
+      2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian)) +  //TODO use Math.abs for negative angle, make sure that is correct
+      2 * this._spacing * Math.cos(segmentEndAngle);
 
-    var h = this._segmentWidth;
+
+    var h = _segmentWidth;
     var l = this.segmentLength;
-    var angle = Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian));
+    var angle = Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian));  //TODO: what angle is this?
 
     this._horizontalSegmentGeometry[1].x = h / 2 / angle;
     this._horizontalSegmentGeometry[1].y = this._horizontalSegmentGeometry[2].y = -h / 2;
@@ -149,12 +189,12 @@ export class Seven {
     var spacing = this._spacing;
     var angle = Math.atan(Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian)));
 
-    var xshift = halfWidth + spacing * Math.cos(angle) + 1;
-    var yshift = halfWidth + spacing * (Math.sin(angle) + Math.cos(angle)) + 1;
+    var xshift = this._segmentHorizontalShiftDistance + spacing * Math.cos(angle) + 1 * 0;
+    var yshift = halfWidth + spacing * (Math.sin(angle) + Math.cos(angle)) + 1 * 0;
 
     var axtrans = xshift + 2 * l * Math.sin(this._angleRadian) + spacing * (Math.cos(angle) - Math.sin(angle));
     var bxtrans = xshift + l + 2 * l * Math.sin(this._angleRadian) + spacing * Math.cos(angle);
-    var cstrans = xshift + l + l * Math.sin(this._angleRadian) + spacing * Math.sin(angle)
+    var cstrans = xshift + l + l * Math.sin(this._angleRadian) + spacing * Math.sin(angle);
     var dxtrans = xshift - spacing * (Math.cos(angle) - Math.sin(angle));
     var extrans = xshift + l * Math.sin(this._angleRadian) - spacing * Math.cos(angle);
     var fxtrans = xshift + 2 * l * Math.sin(this._angleRadian) - spacing * Math.sin(angle);
@@ -251,25 +291,25 @@ export class Seven {
     }
   }
 
-  get ratioLtoH() {
-    return this._ratioLtoH;
+  get ratioLtoW() {
+    return this._ratioLtoW;
   }
 
-  set ratioLtoH(value) {
+  set ratioLtoW(value) {
     let newValue = value * 1;  //TODO explain
     if (newValue != value) {
-      throw new TypeError(`Invalid value (${value}) for ratioLtoH, not a number.`);
+      throw new TypeError(`Invalid value (${value}) for ratioLtoW, not a number.`);
     } else if (newValue < 1) {
-      throw new RangeError(`Invalid value (${newValue}) for ratioLtoH, must be at least 1.`);
+      throw new RangeError(`Invalid value (${newValue}) for ratioLtoW, must be at least 1.`);
     }
-    let oldValue = this._ratioLtoH;
+    let oldValue = this._ratioLtoW;
     try {
-      this._ratioLtoH = newValue;
+      this._ratioLtoW = newValue;
       this._positionSegments();
     } catch (e) {
-      this._ratioLtoH = oldValue;
+      this._ratioLtoW = oldValue;
       this._positionSegments();
-      throw new RangeError(`Invalid value (${newValue}) for ratioLtoH, TODO makes wacky geometry.`);
+      throw new RangeError(`Invalid value (${newValue}) for ratioLtoW, TODO makes wacky geometry.`);
     }
   }
 
