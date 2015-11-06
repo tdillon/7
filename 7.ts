@@ -116,6 +116,7 @@ export class Seven {
    * This method populates the _verticalSegmentGeometry array.
    * The array contains the six points of the vertical segment's geometry.
    * The first element in the array is the top most point.
+   * TODO it looks like the first element is the bottom most point.  it looks like the coordinate system is like canvas, not carteisan, i.e., +y values are below the x axis.
    * The points are then listed in clockwise order.
    * The first point is always at the origin (0,0).
    * The fourth point is always at (0, l). where l is the segment length
@@ -129,31 +130,33 @@ export class Seven {
     this._spacing = (this.ratioLtoS === 0 ? 0 : this.segmentLength / this.ratioLtoS);
     const _segmentWidth = this.segmentLength / this.ratioLtoW;
     this._halfWidth = _segmentWidth / 2;
-    const segmentEndAngle = Math.atan(Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian))); //TODO what angle is this?, i believe this is the 90deg - the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis.  TODO think of a cleaner way to say that.
-    this._segmentHorizontalShiftDistance = ((this._halfWidth / Math.sin(Math.PI / 2 - segmentEndAngle)) * Math.sin((Math.PI / 2 - segmentEndAngle) - this._angleRadian));  //TODO explain this mess
-    //TODO explain height calculation, line by line
-    this._height = _segmentWidth +
-      2 * this.segmentLength * Math.cos(this._angleRadian) +
-      2 * this._spacing * (Math.sin(segmentEndAngle) + Math.cos(segmentEndAngle));
-    //TODO explain width calculation, line by line
-    this._width = //TODO width number don't appear correct for negative values, probably _segmentHorizontalShiftDistance needs cos instead of sin
-      2 * this._segmentHorizontalShiftDistance +
-      this.segmentLength +
-      2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian)) +  //TODO use Math.abs for negative angle, make sure that is correct
-      2 * this._spacing * Math.cos(segmentEndAngle);
 
+    let segmentEndAngle = (Math.PI / 2 - this._angleRadian) / 2; //This is the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis.
 
-    var h = _segmentWidth;
-    var l = this.segmentLength;
-    var angle = Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian));  //TODO: what angle is this?
+    this._segmentHorizontalShiftDistance = this._halfWidth * Math.tan(segmentEndAngle);  //This is the horizontal distance between the left most point in the digit and the nearest point on that same segment.
 
-    this._horizontalSegmentGeometry[1].x = h / 2 / angle;
-    this._horizontalSegmentGeometry[1].y = this._horizontalSegmentGeometry[2].y = -h / 2;
-    this._horizontalSegmentGeometry[2].x = l - h / 2 * angle;
+    this._height =
+      _segmentWidth +  //This is the vertical distance between the first points in the A and D segments and the top and bottom of the digit respectively.
+      2 * this.segmentLength * Math.cos(this._angleRadian) +  //This is the sum of the vertical distance between the 1st and 4th points of the A and B segments.
+      2 * this._spacing * (Math.sin(segmentEndAngle) + Math.cos(segmentEndAngle));  //This is the sum of the vertical distance between the following (1st point of segment A and 1st point of segment F) and (4th point of segment F and 1st point of segment E) and (4th point of segment E and 1st point of segment D).
+
+    this._width = //TODO width is not matching for mirrored angles, e.g., 10deg and -10deg, should they match?
+      2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian)) +  //This is the horizontal distance between the 1st and 4th points in the two the segments that constitute the widest portion of the digit (i.e., B & E when angle >= 0 and C & F when angle < 0).
+      2 * this._spacing * Math.cos(segmentEndAngle) +  //This is the horizontal distance between the 1st and 4th points of the G block and the nearest 2 points described above.
+      this.segmentLength +  //This is the horizontal distance of the G segment.
+      2 * this._segmentHorizontalShiftDistance;  //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
+
+    const h = this._halfWidth;
+    const l = this.segmentLength;
+    const t = Math.tan(segmentEndAngle);  //tangent of the segmentEndAngle, used for several point locations
+
+    this._horizontalSegmentGeometry[1].x = h / t;
+    this._horizontalSegmentGeometry[1].y = this._horizontalSegmentGeometry[2].y = -h;
+    this._horizontalSegmentGeometry[2].x = l - h * t;
     this._horizontalSegmentGeometry[3].x = l;
-    this._horizontalSegmentGeometry[4].x = l - h / 2 / angle;
-    this._horizontalSegmentGeometry[4].y = this._horizontalSegmentGeometry[5].y = h / 2;
-    this._horizontalSegmentGeometry[5].x = h / 2 * angle;
+    this._horizontalSegmentGeometry[4].x = l - h / t;
+    this._horizontalSegmentGeometry[4].y = this._horizontalSegmentGeometry[5].y = h;
+    this._horizontalSegmentGeometry[5].x = h * t;
 
     if (this._horizontalSegmentGeometry[1].x > this._horizontalSegmentGeometry[2].x) {
       throw "TODO values out of whack";
@@ -165,13 +168,13 @@ export class Seven {
       vPoint.y = -hPoint.y;
     }
 
-    //rotate vertical segment
-    const angleFoo = this._angleRadian + Math.PI / 2;  //TODO rename, angleRad + 180 degrees.
+    //rotate vertical segment, https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation
+    const angle = this._angleRadian + Math.PI / 2;  //rotate by 90deg + _angleDeg for proper position
     for (let p of this._verticalSegmentGeometry) {
       const tempX = p.x;
       const tempY = p.y;
-      p.x = tempX * Math.cos(angleFoo) - tempY * Math.sin(angleFoo);
-      p.y = tempX * Math.sin(angleFoo) + tempY * Math.cos(angleFoo);
+      p.x = tempX * Math.cos(angle) - tempY * Math.sin(angle);
+      p.y = tempX * Math.sin(angle) + tempY * Math.cos(angle);
     }
   }
 
@@ -189,8 +192,11 @@ export class Seven {
     var spacing = this._spacing;
     var angle = Math.atan(Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian)));
 
-    var xshift = this._segmentHorizontalShiftDistance + spacing * Math.cos(angle) + 1 * 0;
-    var yshift = halfWidth + spacing * (Math.sin(angle) + Math.cos(angle)) + 1 * 0;
+    var xshift = this._segmentHorizontalShiftDistance + spacing * Math.cos(angle);  //TODO explain
+    if (this._angleDegree < 0) {
+      xshift = this._segmentHorizontalShiftDistance + 2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian));  //TODO explain
+    }
+    var yshift = halfWidth + spacing * (Math.sin(angle) + Math.cos(angle));
 
     var axtrans = xshift + 2 * l * Math.sin(this._angleRadian) + spacing * (Math.cos(angle) - Math.sin(angle));
     var bxtrans = xshift + l + 2 * l * Math.sin(this._angleRadian) + spacing * Math.cos(angle);
