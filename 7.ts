@@ -11,6 +11,12 @@ export interface SevenConfig {
   Value?:number;
 }
 
+export interface TranslationsConfig {
+  x: number;
+  y: number;
+  a: Array<Point>;
+}
+
 export enum SegmentType { A, B, C, D, E, F, G }
 
 export class Segment {
@@ -27,8 +33,18 @@ export class Segment {
   }
 }
 
+/**
+ * The Seven class represents the geometry of a seven segment digit.
+ * The geometry uses a coordinate system that is a cartesian grid with 
+ *    -x values to the left of the origin, 
+ *    +x values to the right of the origin, 
+ *    +y values below the origin, and 
+ *    -y values above the origin.  
+ * This is the coordinate system typically used for computer graphic systems.
+ */
 export class Seven {
   private matrix;
+
   private _horizontalSegmentGeometry:Array<Point> = [
     {x: 0, y: 0},
     {x: 0, y: 0},
@@ -37,6 +53,7 @@ export class Seven {
     {x: 0, y: 0},
     {x: 0, y: 0}
   ];
+
   private _verticalSegmentGeometry:Array<Point> = [
     {x: 0, y: 0},
     {x: 0, y: 0},
@@ -46,24 +63,34 @@ export class Seven {
     {x: 0, y: 0}
   ];
 
+  private _translations:Array<TranslationsConfig> = [
+    {x: 0, y: 0, a: this._horizontalSegmentGeometry},
+    {x: 0, y: 0, a: this._verticalSegmentGeometry},
+    {x: 0, y: 0, a: this._verticalSegmentGeometry},
+    {x: 0, y: 0, a: this._horizontalSegmentGeometry},
+    {x: 0, y: 0, a: this._verticalSegmentGeometry},
+    {x: 0, y: 0, a: this._verticalSegmentGeometry},
+    {x: 0, y: 0, a: this._horizontalSegmentGeometry}
+  ];
+  
   //these are for public getters/setters
-  //TODO explain each of these as needed
-  private _angleDegree:number;
-  private _ratioLtoW:number;
-  private _ratioLtoS:number;
-  private _segmentLength:number;
-  private _segmentHorizontalShiftDistance:number;
+  private _angleDegree:number;  //This is the angle (in degrees) that the digit is from vertical.  + values mean angled to the right, - values mean angled to the left
+  private _segmentLength:number;  //This is the length of each segment in the digit (distance between 1st and 4th points).
+  private _ratioLtoW:number;  //This is the ratio between the length of a segment and it's width.
+  private _ratioLtoS:number;  //This is the ratio between the length of a segment and the space between 2 segments.
 
   //these are for public getters
-  //TODO explain each of these as needed
-  private _height:number;
-  private _width:number;
+  private _height:number;  //The overall height of the digit.
+  private _width:number;  //The overall width of the digit.
 
-  //TODO explain each of these as needed
-  private _angleRadian:number;
-  private _spacing:number;
-  private _halfWidth:number;
-  segments:Array<Segment> = [
+  //these are used to either calculate the horizontal or vertical segment geometry, or the segment positions.
+  private _segmentEndAngle:number;  //This is the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis.
+  private _segmentHorizontalShiftDistance:number;  //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
+  private _angleRadian:number;  //This is the _angleDegree expressed in radians.
+  private _spacing:number;  //This is the distance between 2 adjacent segments.
+  private _halfSegmentWidth:number;  //This is half of the segment's width.
+
+  public segments:Array<Segment> = [
     new Segment(SegmentType.A),
     new Segment(SegmentType.B),
     new Segment(SegmentType.C),
@@ -104,22 +131,24 @@ export class Seven {
 
   /**
    * This method sets the following values for the object.
-   * _angleRadian, _spacing, _halfWidth, _height, _width
+   * _angleRadian, _spacing, _halfSegmentWidth, _height, _width
    *
    * This method populates the _horizontalSegmentGeometry array.
    * The array contains the six points of the horizontal segment's geometry.
    * The first element in the array is the left most point.
    * The points are then listed in clockwise order.
+   * All points besides the first have positive x values.
    * The first point is always at the origin (0,0).
+   * The second and third points have negative y values;
    * The fourth point is always at (l, 0). where l is the segment length
+   * The fifth and sixth points have positive y values.
    *
    * This method populates the _verticalSegmentGeometry array.
    * The array contains the six points of the vertical segment's geometry.
    * The first element in the array is the top most point.
-   * TODO it looks like the first element is the bottom most point.  it looks like the coordinate system is like canvas, not carteisan, i.e., +y values are below the x axis.
-   * The points are then listed in clockwise order.
+   * The points are then listed in counterclockwise order.
+   * All points besides the first have positive y values.
    * The first point is always at the origin (0,0).
-   * The fourth point is always at (0, l). where l is the segment length
    *
    * This method throws an error if the calculated geometry is unexpected.
    *
@@ -129,26 +158,24 @@ export class Seven {
     this._angleRadian = this._angleDegree * Math.PI / 180;
     this._spacing = (this.ratioLtoS === 0 ? 0 : this.segmentLength / this.ratioLtoS);
     const _segmentWidth = this.segmentLength / this.ratioLtoW;
-    this._halfWidth = _segmentWidth / 2;
-
-    let segmentEndAngle = (Math.PI / 2 - this._angleRadian) / 2; //This is the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis.
-
-    this._segmentHorizontalShiftDistance = this._halfWidth * Math.tan(segmentEndAngle);  //This is the horizontal distance between the left most point in the digit and the nearest point on that same segment.
+    this._halfSegmentWidth = _segmentWidth / 2;
+    this._segmentEndAngle = (Math.PI / 2 - this._angleRadian) / 2;
+    this._segmentHorizontalShiftDistance = this._halfSegmentWidth * Math.tan(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle);  //This is the horizontal distance between the left most point in the digit and the nearest point on that same segment.
 
     this._height =
       _segmentWidth +  //This is the vertical distance between the first points in the A and D segments and the top and bottom of the digit respectively.
       2 * this.segmentLength * Math.cos(this._angleRadian) +  //This is the sum of the vertical distance between the 1st and 4th points of the A and B segments.
-      2 * this._spacing * (Math.sin(segmentEndAngle) + Math.cos(segmentEndAngle));  //This is the sum of the vertical distance between the following (1st point of segment A and 1st point of segment F) and (4th point of segment F and 1st point of segment E) and (4th point of segment E and 1st point of segment D).
+      2 * this._spacing * (Math.sin(this._segmentEndAngle) + Math.cos(this._segmentEndAngle));  //This is the sum of the vertical distance between the following (1st point of segment A and 1st point of segment F) and (4th point of segment F and 1st point of segment E) and (4th point of segment E and 1st point of segment D).
 
-    this._width = //TODO width is not matching for mirrored angles, e.g., 10deg and -10deg, should they match?
-      2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian)) +  //This is the horizontal distance between the 1st and 4th points in the two the segments that constitute the widest portion of the digit (i.e., B & E when angle >= 0 and C & F when angle < 0).
-      2 * this._spacing * Math.cos(segmentEndAngle) +  //This is the horizontal distance between the 1st and 4th points of the G block and the nearest 2 points described above.
+    this._width =
+      2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian)) +  //This is the horizontal distance between the 1st and 4th points in the two segments that constitute the widest portion of the digit (i.e., B & E when angle >= 0 and C & F when angle < 0).
+      2 * this._spacing * Math.cos(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) +  //This is the horizontal distance between the 1st and 4th points of the G block and the nearest 2 points described above.
       this.segmentLength +  //This is the horizontal distance of the G segment.
       2 * this._segmentHorizontalShiftDistance;  //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
 
-    const h = this._halfWidth;
+    const h = this._halfSegmentWidth;
     const l = this.segmentLength;
-    const t = Math.tan(segmentEndAngle);  //tangent of the segmentEndAngle, used for several point locations
+    const t = Math.tan(this._segmentEndAngle);  //tangent of the segmentEndAngle, used for several point locations
 
     this._horizontalSegmentGeometry[1].x = h / t;
     this._horizontalSegmentGeometry[1].y = this._horizontalSegmentGeometry[2].y = -h;
@@ -159,7 +186,7 @@ export class Seven {
     this._horizontalSegmentGeometry[5].x = h * t;
 
     if (this._horizontalSegmentGeometry[1].x > this._horizontalSegmentGeometry[2].x) {
-      throw "TODO values out of whack";
+      throw new RangeError(`This digit configuration produces invalid geometry.  angle: ${this._angleDegree},   ratioLtoW: ${this._ratioLtoW},   ratioLtoS: ${this._ratioLtoS}`);
     }
 
     //set vertical segment to horizontal segment mirrored over x axis
@@ -179,76 +206,45 @@ export class Seven {
   }
 
   /**
-   * TODO explain the positioning of the segments
-   * TODO clean up this method, look for performance and readablity improvements
-   * Segments are A, D, & G.
+   * This method first calls _calculateSegmentGeometry to populate the horizontal and vertical geometry arrays.
+   * Then, the x and y translations for each segment are calculated.
+   * Finally, the translations are applied to each segment.
+   *
    * @private
    */
   private _positionSegments() {
     this._calculateSegmentGeometry();
 
-    var l = this.segmentLength;
-    var halfWidth = this._halfWidth;
-    var spacing = this._spacing;
-    var angle = Math.atan(Math.cos(this._angleRadian) / (1 + Math.sin(this._angleRadian)));
+    const l = this.segmentLength;
+    const aC = this._spacing * Math.cos(this._segmentEndAngle);  //Used for horizontal spacing calculations
+    const aS = this._spacing * Math.sin(this._segmentEndAngle);  //Used for horizontal spacing calculations
+    const x = this._translations;
 
-    var xshift = this._segmentHorizontalShiftDistance + spacing * Math.cos(angle);  //TODO explain
-    if (this._angleDegree < 0) {
-      xshift = this._segmentHorizontalShiftDistance + 2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian));  //TODO explain
+    //calculate the x translations
+    x[6].x = this._segmentHorizontalShiftDistance + l * Math.sin(Math.abs(this._angleRadian)) + (this._angleDegree >= 0 ? aC : aS);
+    x[5].x = x[6].x - aS + l * Math.sin(this._angleRadian);
+    x[0].x = x[5].x + aC;
+    x[1].x = x[6].x + l + aC + l * Math.sin(this._angleRadian);
+    x[2].x = x[6].x + l + aS;
+    x[3].x = x[6].x + (aS - aC) - l * Math.sin(this._angleRadian);
+    x[4].x = x[4].x = x[6].x - aC;
+
+    //calculate the y translations
+    x[0].y = this._halfSegmentWidth;
+    x[1].y = x[0].y + aC;
+    x[5].y  = x[0].y + aS;
+    x[6].y = x[5].y + l * Math.cos(this._angleRadian) + aC;
+    x[2].y = x[6].y + aC;
+    x[4].y = x[6].y + aS;
+    x[3].y = x[4].y + l * Math.cos(this._angleRadian) + aC;
+
+    //update all segment positions
+    for (let i = 0, s, t; (s = this.segments[i]) && (t = x[i]); ++i){
+      for (let j = 0, p, g; (p = s.points[j]) && (g = t.a[j]); ++j) {
+        p.x = g.x + t.x;
+        p.y = g.y + t.y;
+      }
     }
-    var yshift = halfWidth + spacing * (Math.sin(angle) + Math.cos(angle));
-
-    var axtrans = xshift + 2 * l * Math.sin(this._angleRadian) + spacing * (Math.cos(angle) - Math.sin(angle));
-    var bxtrans = xshift + l + 2 * l * Math.sin(this._angleRadian) + spacing * Math.cos(angle);
-    var cstrans = xshift + l + l * Math.sin(this._angleRadian) + spacing * Math.sin(angle);
-    var dxtrans = xshift - spacing * (Math.cos(angle) - Math.sin(angle));
-    var extrans = xshift + l * Math.sin(this._angleRadian) - spacing * Math.cos(angle);
-    var fxtrans = xshift + 2 * l * Math.sin(this._angleRadian) - spacing * Math.sin(angle);
-    var gxtrans = xshift + l * Math.sin(this._angleRadian);
-
-    var aytrans = yshift - spacing * (Math.sin(angle) + Math.cos(angle));
-    var bytrans = yshift - spacing * Math.sin(angle);
-    var cytrans = yshift + l * Math.cos(this._angleRadian) + spacing * Math.cos(angle);
-    var dytrans = yshift + 2 * l * Math.cos(this._angleRadian) + spacing * (Math.sin(angle) + Math.cos(angle));
-    var eytrans = yshift + l * Math.cos(this._angleRadian) + spacing * Math.sin(angle);
-    var fytrans = yshift - spacing * Math.cos(angle);
-    var gytrans = yshift + l * Math.cos(this._angleRadian);
-
-
-    //HORIZONTAL SEGMENTS
-    for (let i = 0, a, g; (a = this.segments[0].points[i]) && (g = this._horizontalSegmentGeometry[i]); ++i) {
-      a.x = g.x + axtrans;
-      a.y = g.y + aytrans;
-    }
-
-    for (let i = 0, d, g; (d = this.segments[3].points[i]) && (g = this._horizontalSegmentGeometry[i]); ++i) {
-      d.x = g.x + dxtrans;
-      d.y = g.y + dytrans;
-    }
-
-    for (let i = 0, gh, g; (gh = this.segments[6].points[i]) && (g = this._horizontalSegmentGeometry[i]); ++i) {
-      gh.x = g.x + gxtrans;
-      gh.y = g.y + gytrans;
-    }
-
-    //VERTICAL SEGMENTS
-    for (let i = 0, b, g; (b = this.segments[1].points[i]) && (g = this._verticalSegmentGeometry[i]); ++i) {
-      b.x = g.x + bxtrans;
-      b.y = g.y + bytrans;
-    }
-    for (let i = 0, c, g; (c = this.segments[2].points[i]) && (g = this._verticalSegmentGeometry[i]); ++i) {
-      c.x = g.x + cstrans;
-      c.y = g.y + cytrans;
-    }
-    for (let i = 0, e, g; (e = this.segments[4].points[i]) && (g = this._verticalSegmentGeometry[i]); ++i) {
-      e.x = g.x + extrans;
-      e.y = g.y + eytrans;
-    }
-    for (let i = 0, f, g; (f = this.segments[5].points[i]) && (g = this._verticalSegmentGeometry[i]); ++i) {
-      f.x = g.x + fxtrans;
-      f.y = g.y + fytrans;
-    }
-
   }
 
   on(segment) {
@@ -260,8 +256,8 @@ export class Seven {
   }
 
   set angle(value) {
-    let newValue = value * 1;  //TODO explain, convert value to a number
-    if (newValue != value) {  //TODO this doesn't work in all cases, empty string, spaces, and infinity
+    let newValue = value * 1;  //Attempt to convert to a number.
+    if (newValue != value || (typeof value === 'string' && value.toString().trim() === '')) {  //Check for cases when nonnumberic string, spaces, or empty strings are used.
       throw new TypeError(`Invalid value (${value}) for angle, not a number.`);
     } else if (newValue <= -90 || newValue >= 90) {
       throw new RangeError(`Invalid value (${newValue}) for angle, must be between 90 and -90 degrees.`);
