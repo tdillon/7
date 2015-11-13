@@ -3,23 +3,29 @@ export interface Point {
   y:number;
 }
 
+
 export interface SevenConfig {
-  SegmentLength?:number;
-  Angle?:number;
+  segmentLength?:number;
+  angle?:number;
   ratioLtoW?:number;
-  RatioLtoS?:number;
-  Value?:number;
+  ratioLtoS?:number;
+  digit?:Digit;
 }
 
-export interface TranslationsConfig {
+
+interface TranslationsConfig {
   x: number;
   y: number;
   a: Array<Point>;
 }
 
-export enum SegmentType { A, B, C, D, E, F, G }
+
+export enum Digit { ZERO = 0, ONE = 1, TWO = 2, THREE = 3, FOUR = 4, FIVE = 5, SIX = 6, SEVEN = 7, EIGHT = 8, NINE = 9, BLANK = 10, D = 11 }
+
 
 export class Segment {
+  on:boolean = false;
+
   points:Array<Point> = [
     {x: 0, y: 0},
     {x: 0, y: 0},
@@ -29,21 +35,37 @@ export class Segment {
     {x: 0, y: 0}
   ];
 
-  constructor(public type:SegmentType) {
+  get off() {
+    return !this.on;
   }
 }
 
+
 /**
  * The Seven class represents the geometry of a seven segment digit.
- * The geometry uses a coordinate system that is a cartesian grid with 
- *    -x values to the left of the origin, 
- *    +x values to the right of the origin, 
- *    +y values below the origin, and 
- *    -y values above the origin.  
+ * The geometry uses a coordinate system that is a cartesian grid with
+ *    -x values to the left of the origin,
+ *    +x values to the right of the origin,
+ *    +y values below the origin, and
+ *    -y values above the origin.
  * This is the coordinate system typically used for computer graphic systems.
  */
 export class Seven {
-  private matrix;
+  static matrix = [
+    //A     B      C      D      E      F      G
+    [true, true, true, true, true, true, false],  //0
+    [false, true, true, false, false, false, false],  //1
+    [true, true, false, true, true, false, true],  //2
+    [true, true, true, true, false, false, true],  //3
+    [false, true, true, false, false, true, true],  //4
+    [true, false, true, true, false, true, true],  //5
+    [true, false, true, true, true, true, true],  //6
+    [true, true, true, false, false, false, false],  //7
+    [true, true, true, true, true, true, true],  //8
+    [true, true, true, true, false, true, true],  //9
+    [false, false, false, false, false, false, false],  //BLANK
+    [false, true, true, true, true, false, true],  //d
+  ];
 
   private _horizontalSegmentGeometry:Array<Point> = [
     {x: 0, y: 0},
@@ -72,7 +94,7 @@ export class Seven {
     {x: 0, y: 0, a: this._verticalSegmentGeometry},
     {x: 0, y: 0, a: this._horizontalSegmentGeometry}
   ];
-  
+
   //these are for public getters/setters
   private _angleDegree:number;  //This is the angle (in degrees) that the digit is from vertical.  + values mean angled to the right, - values mean angled to the left
   private _segmentLength:number;  //This is the length of each segment in the digit (distance between 1st and 4th points).
@@ -90,43 +112,80 @@ export class Seven {
   private _spacing:number;  //This is the distance between 2 adjacent segments.
   private _halfSegmentWidth:number;  //This is half of the segment's width.
 
-  public segments:Array<Segment> = [
-    new Segment(SegmentType.A),
-    new Segment(SegmentType.B),
-    new Segment(SegmentType.C),
-    new Segment(SegmentType.D),
-    new Segment(SegmentType.E),
-    new Segment(SegmentType.F),
-    new Segment(SegmentType.G)
-  ];
-  value;
+  public segments:Array<Segment> = [new Segment(), new Segment(), new Segment(), new Segment(), new Segment(), new Segment(), new Segment()];
+  private _digit;
 
-  constructor({SegmentLength = 50, Angle = 10, ratioLtoW = 4, RatioLtoS = 32, Value = 7}: SevenConfig = {}) {
-    //TODO object could be constructed with wacky values, handle for that.
-    this._angleDegree = Angle;
-    this.value = Value;
-    this._segmentLength = SegmentLength;
+  /**
+   * Construct a new Seven object.
+   * Optionally pass a SevenConfig object to set properties.
+   * Each property of the SevenConfig object is optional.
+   * If the passed in config contains bad values an exception will be thrown.
+   */
+  constructor({segmentLength = 50, angle = 10, ratioLtoW = 4, ratioLtoS = 32, digit = Digit.BLANK}: SevenConfig = {}) {
+    this._angleDegree = angle;
+    this.digit = digit;
+    this._segmentLength = segmentLength;
     this._ratioLtoW = ratioLtoW;
-    this._ratioLtoS = RatioLtoS;
+    this._ratioLtoS = ratioLtoS;
 
     this._positionSegments();
+  }
 
-    this.matrix = [
-      //A     B      C      D      E      F      G
-      [true, true, true, true, true, true, false],  //0
-      [false, true, true, false, false, false, false],  //1
-      [true, true, false, true, true, false, true],  //2
-      [true, true, true, true, false, false, true],  //3
-      [false, true, true, false, false, true, true],  //4
-      [true, false, true, true, false, true, true],  //5
-      [true, false, true, true, true, true, true],  //6
-      [true, true, true, false, false, false, false],  //7
-      [true, true, true, true, true, true, true],  //8
-      [true, true, true, true, false, true, true],  //9
-      [false, false, false, false, false, false, false],  //BLANK
-      [false, true, true, true, true, false, true],  //d
-    ];
+  /**
+   * Check the segmentLength, angle, ratioLtoH, and ratioLtoS for valid values.
+   * Throws exception on first found issue.
+   *
+   * @private
+   */
+  private _checkConfig() {
+    let a;
+    let b;
 
+    //Check segment length
+    a = this._segmentLength;
+    b = a * 1;  //convert to a number
+    if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {  //Check for cases when nonnumeric string, spaces, or empty strings are used.
+      throw new TypeError(`Invalid value (${a}) for segment length, not a number.`);
+    } else if (b <= 0) {
+      throw new RangeError(`Invalid value (${b}) for segment length, must be greater than 0.`);
+    } else if (!isFinite(b)) {
+      throw new RangeError(`Invalid value (${b}) for segment length, must be finite.`);
+    }
+    this._segmentLength = b;
+
+    //Check angle
+    a = this._angleDegree;
+    b = a * 1;  //convert to a number
+    if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {  //Check for cases when nonnumeric string, spaces, or empty strings are used.
+      throw new TypeError(`Invalid value (${a}) for angle, not a number.`);
+    } else if (b <= -90 || b >= 90) {
+      throw new RangeError(`Invalid value (${b}) for angle, must be between 90 and -90 degrees.`);
+    }
+    this._angleDegree = b;
+
+    //Check ratioLtoW
+    a = this._ratioLtoW;
+    b = a * 1;  //convert to a number
+    if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {  //Check for cases when nonnumeric string, spaces, or empty strings are used.
+      throw new TypeError(`Invalid value (${a}) for ratioLtoW, not a number.`);
+    } else if (b < 1) {
+      throw new RangeError(`Invalid value (${b}) for ratioLtoW, must be at least 1.`);
+    } else if (!isFinite(b)) {
+      throw new RangeError(`Invalid value (${b}) for ratioLtoW, must be finite.`);
+    }
+    this._ratioLtoW = b;
+
+    //Check ratioLtoS
+    a = this._ratioLtoS;
+    b = a * 1;  //convert to a number
+    if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {  //Check for cases when null, undefined, object, nonnumeric string, spaces, or empty strings are used.
+      throw new TypeError(`Invalid value (${a}) for ratioLtoS, not a number.`);
+    } else if (b <= 0) {
+      throw new RangeError(`Invalid value (${b}) for ratioLtoS, must be greater than 0.`);
+    } else if (!isFinite(b)) {
+      throw new RangeError(`Invalid value (${b}) for ratioLtoS, must be finite.`);
+    }
+    this._ratioLtoS = b;
   }
 
   /**
@@ -213,6 +272,7 @@ export class Seven {
    * @private
    */
   private _positionSegments() {
+    this._checkConfig();
     this._calculateSegmentGeometry();
 
     const l = this.segmentLength;
@@ -232,14 +292,14 @@ export class Seven {
     //calculate the y translations
     x[0].y = this._halfSegmentWidth;
     x[1].y = x[0].y + aC;
-    x[5].y  = x[0].y + aS;
+    x[5].y = x[0].y + aS;
     x[6].y = x[5].y + l * Math.cos(this._angleRadian) + aC;
     x[2].y = x[6].y + aC;
     x[4].y = x[6].y + aS;
     x[3].y = x[4].y + l * Math.cos(this._angleRadian) + aC;
 
     //update all segment positions
-    for (let i = 0, s, t; (s = this.segments[i]) && (t = x[i]); ++i){
+    for (let i = 0, s, t; (s = this.segments[i]) && (t = x[i]); ++i) {
       for (let j = 0, p, g; (p = s.points[j]) && (g = t.a[j]); ++j) {
         p.x = g.x + t.x;
         p.y = g.y + t.y;
@@ -247,8 +307,17 @@ export class Seven {
     }
   }
 
-  on(segment) {
-    return this.matrix[this.value][segment.type.charCodeAt(0) - 65];  //TODO use an enum or something
+  private _set(prop:string, value:any):void {
+    let oldValue = this[prop];
+
+    try {
+      this[prop] = value;
+      this._positionSegments();
+    } catch (e) {
+      this[prop] = oldValue;
+      this._positionSegments();
+      throw e;
+    }
   }
 
   get angle() {
@@ -256,21 +325,7 @@ export class Seven {
   }
 
   set angle(value) {
-    let newValue = value * 1;  //Attempt to convert to a number.
-    if (newValue != value || (typeof value === 'string' && value.toString().trim() === '')) {  //Check for cases when nonnumberic string, spaces, or empty strings are used.
-      throw new TypeError(`Invalid value (${value}) for angle, not a number.`);
-    } else if (newValue <= -90 || newValue >= 90) {
-      throw new RangeError(`Invalid value (${newValue}) for angle, must be between 90 and -90 degrees.`);
-    }
-    let oldValue = this._angleDegree;
-    try {
-      this._angleDegree = newValue;
-      this._positionSegments();
-    } catch (e) {
-      this._angleDegree = oldValue;
-      this._positionSegments();
-      throw new RangeError(`Invalid value (${newValue}) for angle, TODO makes wacky geometry.`);
-    }
+    this._set('_angleDegree', value);
   }
 
   get segmentLength() {
@@ -278,19 +333,7 @@ export class Seven {
   }
 
   set segmentLength(value) {
-    let newValue = value * 1;  //TODO explain
-    if (newValue != value) {
-      throw new TypeError(`Invalid value (${value}) for segmentLength, not a number.`);
-    }
-    let oldValue = this._segmentLength;
-    try {
-      this._segmentLength = newValue;
-      this._positionSegments();
-    } catch (e) {
-      this._segmentLength = oldValue;
-      this._positionSegments();
-      throw new RangeError(`Invalid value (${newValue}) for segmentLength, TODO makes wacky geometry.`);
-    }
+    this._set('_segmentLength', value);
   }
 
   get ratioLtoW() {
@@ -298,21 +341,7 @@ export class Seven {
   }
 
   set ratioLtoW(value) {
-    let newValue = value * 1;  //TODO explain
-    if (newValue != value) {
-      throw new TypeError(`Invalid value (${value}) for ratioLtoW, not a number.`);
-    } else if (newValue < 1) {
-      throw new RangeError(`Invalid value (${newValue}) for ratioLtoW, must be at least 1.`);
-    }
-    let oldValue = this._ratioLtoW;
-    try {
-      this._ratioLtoW = newValue;
-      this._positionSegments();
-    } catch (e) {
-      this._ratioLtoW = oldValue;
-      this._positionSegments();
-      throw new RangeError(`Invalid value (${newValue}) for ratioLtoW, TODO makes wacky geometry.`);
-    }
+    this._set('_ratioLtoW', value);
   }
 
   get ratioLtoS() {
@@ -320,24 +349,27 @@ export class Seven {
   }
 
   set ratioLtoS(value) {
-    let newValue = value * 1;  //convert to number TODO explain
-    if (newValue != value) {  //check that value is actually a 'number', could be a string  TODO explain
-      throw new TypeError(`Invalid value (${value}) for ratioLtoS, not a number.`);
-    } else if (newValue <= 0) {
-      throw new RangeError(`Invalid value (${newValue}) for ratioLtoS, must be greater than 0.`);
-    }
-    let oldValue = this._ratioLtoS;
-    try {
-      this._ratioLtoS = newValue;
-      this._positionSegments();
-    } catch (e) {
-      this._ratioLtoS = oldValue;
-      this._positionSegments();
-      throw new RangeError(`Invalid value (${newValue}) for ratioLtoS, TODO makes wacky geometry.`);
-    }
+    this._set('_ratioLtoS', value);
+  }
 
-    this._ratioLtoS = value;
-    this._positionSegments();
+  get digit():Digit {
+    return this._digit;
+  }
+
+  set digit(value:Digit) {
+    //Check digit
+    let newValue = value * 1;  //convert to a number
+    if (newValue != value || (typeof value === 'string' && value.toString().trim() === '')) {  //Check for cases when nonnumeric string, spaces, or empty strings are used.
+      throw new TypeError(`Invalid value (${value}) for digit, not a Digit.`);
+    } else if (Digit[newValue] === undefined) {
+      throw new RangeError(`Invalid value (${newValue}) for digit, must be a Digit.`);
+    }
+    this._digit = newValue;
+
+    //Set segment's on/off as needed
+    for (let i = 0, s; s = this.segments[i]; ++i) {
+      s.on = Seven.matrix[this._digit][i];
+    }
   }
 
   get height() {
@@ -346,13 +378,5 @@ export class Seven {
 
   get width() {
     return this._width;
-  }
-
-  static get BLANK() {
-    return 10;
-  }
-
-  static get D() {
-    return 11;
   }
 }
