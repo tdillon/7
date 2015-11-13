@@ -1,24 +1,27 @@
 {
   "name": "seven-segment",
-  "version": "2.0.1",
-  "description": "A seven segment display geometry library for JavaScript.",
-  "main": "7.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "A seven segment display geometry library for TypeScript/JavaScript.",
+  "version": "3.0.0",
+  "author": {
+    "name": "Travis Dillon"
   },
+  "homepage": "https://github.com/tdillon/7#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tdillon/7.git"
   },
-  "keywords": [
-    "javascript",
-    "seven segment display"
-  ],
-  "author": "Travis Dillon",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/tdillon/7/issues"
   },
-  "homepage": "https://github.com/tdillon/7#readme",
+  "main": "7.ts",
+  "keywords": [
+    "javascript",
+    "typescript",
+    "seven segment display"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "format": "es6"
 }
