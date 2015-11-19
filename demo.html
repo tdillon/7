@@ -230,12 +230,16 @@
   <a href=http://tdillon.github.io/7>7</a>
 </footer>
 
-<script src="../node_modules/systemjs/dist/system.src.js"></script>
+<!--
+<script src="jspm_packages/system.js"></script>
+<script src=config.js></script>
+-->
+<script src=javascripts/bundle.js></script>
 <script>
-  System.config({
-    packages: {'app': {defaultExtension: 'js'}},
+  /*System.config({
+    packages: {'javascripts': {defaultExtension: 'js'}},
     paths: {'npm:*': '../node_modules/*.js'},
     map: {'seven-segment': 'npm:seven-segment'}
-  });
-  System.import('app/app');
+  });*/
+  //System.import('javascripts/app');
 </script>
