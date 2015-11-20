@@ -21,7 +21,6 @@
   ],
   "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "format": "es6"
+    "tsc": "tsc 7.ts -m commonjs -t ES5 -d"
+  }
 }
