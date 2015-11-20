@@ -7,6 +7,6 @@ System.config({
   },
 
   map: {
-    "seven-segment": "npm:seven-segment@3.0.1"
+    "seven-segment": "npm:seven-segment@3.0.2"
   }
 });
