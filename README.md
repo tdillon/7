@@ -1,3 +1,6 @@
+### Demo
+Visit http://tdillon.github.io/7/demo.html for a demo of what information this library can produce.
+
 ### Installation
 You can use npm, jspm, or directly link the files as you see fit.
 
