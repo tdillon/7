@@ -5,7 +5,8 @@ export interface Point {
 
 
 export interface SevenConfig {
-  segmentLength?:number;
+  height?:number;
+  width?:number;
   angle?:number;
   ratioLtoW?:number;
   ratioLtoS?:number;
@@ -51,7 +52,8 @@ export class Segment {
  * This is the coordinate system typically used for computer graphic systems.
  */
 export class Seven {
-  static matrix = [
+  /** Lookup between which segments are used for each digit.  */
+  private static matrix = [
     //A     B      C      D      E      F      G
     [true, true, true, true, true, true, false],  //0
     [false, true, true, false, false, false, false],  //1
@@ -66,7 +68,7 @@ export class Seven {
     [false, false, false, false, false, false, false],  //BLANK
     [false, true, true, true, true, false, true],  //d
   ];
-
+  /** The cononical points for a horizontal segment for the given configuration. */
   private _horizontalSegmentGeometry:Array<Point> = [
     {x: 0, y: 0},
     {x: 0, y: 0},
@@ -75,7 +77,7 @@ export class Seven {
     {x: 0, y: 0},
     {x: 0, y: 0}
   ];
-
+  /** The cononical points for a vertical segment for the given configuration. */
   private _verticalSegmentGeometry:Array<Point> = [
     {x: 0, y: 0},
     {x: 0, y: 0},
@@ -84,7 +86,7 @@ export class Seven {
     {x: 0, y: 0},
     {x: 0, y: 0}
   ];
-
+  /** The x and y shifts that must be applied to each segment. */
   private _translations:Array<TranslationsConfig> = [
     {x: 0, y: 0, a: this._horizontalSegmentGeometry},
     {x: 0, y: 0, a: this._verticalSegmentGeometry},
@@ -95,25 +97,44 @@ export class Seven {
     {x: 0, y: 0, a: this._horizontalSegmentGeometry}
   ];
 
-  //these are for public getters/setters
-  private _angleDegree:number;  //This is the angle (in degrees) that the digit is from vertical.  + values mean angled to the right, - values mean angled to the left
-  private _segmentLength:number;  //This is the length of each segment in the digit (distance between 1st and 4th points).
-  private _ratioLtoW:number;  //This is the ratio between the length of a segment and it's width.
-  private _ratioLtoS:number;  //This is the ratio between the length of a segment and the space between 2 segments.
-
-  //these are for public getters
-  private _height:number;  //The overall height of the digit.
-  private _width:number;  //The overall width of the digit.
-
-  //these are used to either calculate the horizontal or vertical segment geometry, or the segment positions.
-  private _segmentEndAngle:number;  //This is the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis.
-  private _segmentHorizontalShiftDistance:number;  //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
-  private _angleRadian:number;  //This is the _angleDegree expressed in radians.
-  private _spacing:number;  //This is the distance between 2 adjacent segments.
-  private _halfSegmentWidth:number;  //This is half of the segment's width.
-
+  /** The segments, A-G of the digit. */
   public segments:Array<Segment> = [new Segment(), new Segment(), new Segment(), new Segment(), new Segment(), new Segment(), new Segment()];
+
+  //THESE ARE FOR PUBLIC GETTERS/SETTERS
+
+  /** This is the angle (in degrees) that the digit is from vertical.  + values mean angled to the right, - values mean angled to the left */
+  private _angleDegree:number;
+  /** This is the ratio between the length of a segment and it's width. */
+  private _ratioLtoW:number;
+  /** This is the ratio between the length of a segment and the space between 2 segments. */
+  private _ratioLtoS:number;
+  /** The overall height of the digit. */
+  private _height:number;
+  /**  The 'digit' (e.g., 1, 2, blank) for which the segments will be set to on/off. */
   private _digit;
+
+  //THESE ARE FOR PUBLIC GETTERS
+
+  /** The overall width of the digit. */
+  private _width:number;
+
+  //THESE ARE USED TO EITHER CALCULATE THE HORIZONTAL OR VERTICAL SEGMENT GEOMETRY, OR THE SEGMENT POSITIONS.
+
+  /** This is the length of each segment in the digit (distance between 1st and 4th points). */
+  private _segmentLength:number;
+  /** This is the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis. */
+  private _segmentEndAngle:number;
+  /** This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment. */
+  private _segmentHorizontalShiftDistance:number;
+  /** This is the _angleDegree expressed in radians. */
+  private _angleRadian:number;
+  /** This is the distance between 2 adjacent segments. */
+  private _spacing:number;
+  /** This is half of the segment's width. */
+  private _halfSegmentWidth:number;
+  /** When true heigt is fixed, when false, width is fixed. */
+  private _isHeightFixed:boolean;
+
 
   /**
    * Construct a new Seven object.
@@ -121,18 +142,26 @@ export class Seven {
    * Each property of the SevenConfig object is optional.
    * If the passed in config contains bad values an exception will be thrown.
    */
-  constructor({segmentLength = 50, angle = 10, ratioLtoW = 4, ratioLtoS = 32, digit = Digit.BLANK}: SevenConfig = {}) {
+  constructor({height, width, angle = 10, ratioLtoW = 4, ratioLtoS = 32, digit = Digit.BLANK}: SevenConfig = {}) {
     this._angleDegree = angle;
     this.digit = digit;
-    this._segmentLength = segmentLength;
     this._ratioLtoW = ratioLtoW;
     this._ratioLtoS = ratioLtoS;
+    this._height = this._width = 100;  //initialize so checkConfig passes, and for default case
+    this._isHeightFixed = true;
+
+    if (height !== undefined) {  //height was specified
+      this._height = height;
+    } else if( width !== undefined){  //width specified
+      this._width = width;
+      this._isHeightFixed = false;
+    }  //else - neither specified, default to height=100
 
     this._positionSegments();
   }
 
   /**
-   * Check the segmentLength, angle, ratioLtoH, and ratioLtoS for valid values.
+   * Check the height, width, angle, ratioLtoH, and ratioLtoS for valid values.
    * Throws exception on first found issue.
    *
    * @private
@@ -141,17 +170,29 @@ export class Seven {
     let a;
     let b;
 
-    //Check segment length
-    a = this._segmentLength;
+    //check height
+    a = this._height;
     b = a * 1;  //convert to a number
     if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {  //Check for cases when nonnumeric string, spaces, or empty strings are used.
-      throw new TypeError(`Invalid value (${a}) for segment length, not a number.`);
+      throw new TypeError(`Invalid value (${a}) for height, not a number.`);
     } else if (b <= 0) {
-      throw new RangeError(`Invalid value (${b}) for segment length, must be greater than 0.`);
+      throw new RangeError(`Invalid value (${b}) for height, must be greater than 0.`);
     } else if (!isFinite(b)) {
-      throw new RangeError(`Invalid value (${b}) for segment length, must be finite.`);
+      throw new RangeError(`Invalid value (${b}) for height, must be finite.`);
     }
-    this._segmentLength = b;
+    this._height = b;
+
+      //check width
+      a = this._width;
+      b = a * 1;  //convert to a number
+      if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {  //Check for cases when nonnumeric string, spaces, or empty strings are used.
+        throw new TypeError(`Invalid value (${a}) for width, not a number.`);
+      } else if (b <= 0) {
+        throw new RangeError(`Invalid value (${b}) for width, must be greater than 0.`);
+      } else if (!isFinite(b)) {
+        throw new RangeError(`Invalid value (${b}) for width, must be finite.`);
+      }
+      this._width = b;
 
     //Check angle
     a = this._angleDegree;
@@ -190,7 +231,7 @@ export class Seven {
 
   /**
    * This method sets the following values for the object.
-   * _angleRadian, _spacing, _halfSegmentWidth, _height, _width
+   * _segmentLength, _angleRadian, _spacing, _halfSegmentWidth, _height, _width
    *
    * This method populates the _horizontalSegmentGeometry array.
    * The array contains the six points of the horizontal segment's geometry.
@@ -215,25 +256,35 @@ export class Seven {
    */
   private _calculateSegmentGeometry() {
     this._angleRadian = this._angleDegree * Math.PI / 180;
-    this._spacing = (this.ratioLtoS === 0 ? 0 : this.segmentLength / this.ratioLtoS);
-    const _segmentWidth = this.segmentLength / this.ratioLtoW;
-    this._halfSegmentWidth = _segmentWidth / 2;
     this._segmentEndAngle = (Math.PI / 2 - this._angleRadian) / 2;
+
+    //These calculations for segmentLength are the same as the height and width calcs below, except solved for segmentLength;
+    if (this._isHeightFixed) {  //HEIGHT IS FIXED
+      this._segmentLength = this._height / (1 / this._ratioLtoW + 2 * Math.cos(this._angleRadian) + 2 * (Math.sin(this._segmentEndAngle) + Math.cos(this._segmentEndAngle)) / this._ratioLtoS);
+    } else {  //WIDTH IS FIXED
+      this._segmentLength = this._width / (2 * Math.sin(Math.abs(this._angleRadian)) + 2 * Math.cos(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) / this._ratioLtoS + 1 + Math.tan(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) / this._ratioLtoW);
+    }
+
+    this._spacing = this._segmentLength / this.ratioLtoS;
+    const _segmentWidth = this._segmentLength / this.ratioLtoW;
+    this._halfSegmentWidth = _segmentWidth / 2;
     this._segmentHorizontalShiftDistance = this._halfSegmentWidth * Math.tan(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle);  //This is the horizontal distance between the left most point in the digit and the nearest point on that same segment.
 
-    this._height =
-      _segmentWidth +  //This is the vertical distance between the first points in the A and D segments and the top and bottom of the digit respectively.
-      2 * this.segmentLength * Math.cos(this._angleRadian) +  //This is the sum of the vertical distance between the 1st and 4th points of the A and B segments.
-      2 * this._spacing * (Math.sin(this._segmentEndAngle) + Math.cos(this._segmentEndAngle));  //This is the sum of the vertical distance between the following (1st point of segment A and 1st point of segment F) and (4th point of segment F and 1st point of segment E) and (4th point of segment E and 1st point of segment D).
-
-    this._width =
-      2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian)) +  //This is the horizontal distance between the 1st and 4th points in the two segments that constitute the widest portion of the digit (i.e., B & E when angle >= 0 and C & F when angle < 0).
-      2 * this._spacing * Math.cos(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) +  //This is the horizontal distance between the 1st and 4th points of the G block and the nearest 2 points described above.
-      this.segmentLength +  //This is the horizontal distance of the G segment.
-      2 * this._segmentHorizontalShiftDistance;  //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
+    if (this._isHeightFixed) {
+      this._width =
+        2 * this._segmentLength * Math.sin(Math.abs(this._angleRadian)) +  //This is the horizontal distance between the 1st and 4th points in the two segments that constitute the widest portion of the digit (i.e., B & E when angle >= 0 and C & F when angle < 0).
+        2 * this._spacing * Math.cos(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) +  //This is the horizontal distance between the 1st and 4th points of the G block and the nearest 2 points described above.
+        this._segmentLength +  //This is the horizontal distance of the G segment.
+        2 * this._segmentHorizontalShiftDistance;  //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
+    } else {
+      this._height =
+        _segmentWidth +  //This is the vertical distance between the first points in the A and D segments and the top and bottom of the digit respectively.
+        2 * this._segmentLength * Math.cos(this._angleRadian) +  //This is the sum of the vertical distance between the 1st and 4th points of the A and B segments.
+        2 * this._spacing * (Math.sin(this._segmentEndAngle) + Math.cos(this._segmentEndAngle));  //This is the sum of the vertical distance between the following (1st point of segment A and 1st point of segment F) and (4th point of segment F and 1st point of segment E) and (4th point of segment E and 1st point of segment D).
+    }
 
     const h = this._halfSegmentWidth;
-    const l = this.segmentLength;
+    const l = this._segmentLength;
     const t = Math.tan(this._segmentEndAngle);  //tangent of the segmentEndAngle, used for several point locations
 
     this._horizontalSegmentGeometry[1].x = h / t;
@@ -275,7 +326,7 @@ export class Seven {
     this._checkConfig();
     this._calculateSegmentGeometry();
 
-    const l = this.segmentLength;
+    const l = this._segmentLength;
     const aC = this._spacing * Math.cos(this._segmentEndAngle);  //Used for horizontal spacing calculations
     const aS = this._spacing * Math.sin(this._segmentEndAngle);  //Used for horizontal spacing calculations
     const x = this._translations;
@@ -328,14 +379,6 @@ export class Seven {
     this._set('_angleDegree', value);
   }
 
-  get segmentLength() {
-    return this._segmentLength;
-  }
-
-  set segmentLength(value) {
-    this._set('_segmentLength', value);
-  }
-
   get ratioLtoW() {
     return this._ratioLtoW;
   }
@@ -376,7 +419,29 @@ export class Seven {
     return this._height;
   }
 
+  set height(value) {
+    const orig = this._isHeightFixed;
+    this._isHeightFixed = true;
+    try {
+      this._set('_height', value);
+    } catch (e) {
+      this._isHeightFixed = orig;
+      throw e;
+    }
+  }
+
   get width() {
     return this._width;
+  }
+
+  set width(value) {
+    const orig = this._isHeightFixed;
+    this._isHeightFixed = false;
+    try {
+      this._set('_width', value);
+    } catch (e) {
+      this._isHeightFixed = orig;
+      throw e;
+    }
   }
 }

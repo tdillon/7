@@ -3,7 +3,8 @@ export interface Point {
     y: number;
 }
 export interface SevenConfig {
-    segmentLength?: number;
+    height?: number;
+    width?: number;
     angle?: number;
     ratioLtoW?: number;
     ratioLtoS?: number;
@@ -38,32 +39,51 @@ export declare class Segment {
  * This is the coordinate system typically used for computer graphic systems.
  */
 export declare class Seven {
-    static matrix: boolean[][];
+    /** Lookup between which segments are used for each digit.  */
+    private static matrix;
+    /** The cononical points for a horizontal segment for the given configuration. */
     private _horizontalSegmentGeometry;
+    /** The cononical points for a vertical segment for the given configuration. */
     private _verticalSegmentGeometry;
+    /** The x and y shifts that must be applied to each segment. */
     private _translations;
-    private _angleDegree;
-    private _segmentLength;
-    private _ratioLtoW;
-    private _ratioLtoS;
-    private _height;
-    private _width;
-    private _segmentEndAngle;
-    private _segmentHorizontalShiftDistance;
-    private _angleRadian;
-    private _spacing;
-    private _halfSegmentWidth;
+    /** The segments, A-G of the digit. */
     segments: Array<Segment>;
+    /** This is the angle (in degrees) that the digit is from vertical.  + values mean angled to the right, - values mean angled to the left */
+    private _angleDegree;
+    /** This is the ratio between the length of a segment and it's width. */
+    private _ratioLtoW;
+    /** This is the ratio between the length of a segment and the space between 2 segments. */
+    private _ratioLtoS;
+    /** The overall height of the digit. */
+    private _height;
+    /**  The 'digit' (e.g., 1, 2, blank) for which the segments will be set to on/off. */
     private _digit;
+    /** The overall width of the digit. */
+    private _width;
+    /** This is the length of each segment in the digit (distance between 1st and 4th points). */
+    private _segmentLength;
+    /** This is the angle between the first 2 points in the _horizontalSegmentGeometry array and the x axis. */
+    private _segmentEndAngle;
+    /** This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment. */
+    private _segmentHorizontalShiftDistance;
+    /** This is the _angleDegree expressed in radians. */
+    private _angleRadian;
+    /** This is the distance between 2 adjacent segments. */
+    private _spacing;
+    /** This is half of the segment's width. */
+    private _halfSegmentWidth;
+    /** When true heigt is fixed, when false, width is fixed. */
+    private _isHeightFixed;
     /**
      * Construct a new Seven object.
      * Optionally pass a SevenConfig object to set properties.
      * Each property of the SevenConfig object is optional.
      * If the passed in config contains bad values an exception will be thrown.
      */
-    constructor({segmentLength, angle, ratioLtoW, ratioLtoS, digit}?: SevenConfig);
+    constructor({height, width, angle, ratioLtoW, ratioLtoS, digit}?: SevenConfig);
     /**
-     * Check the segmentLength, angle, ratioLtoH, and ratioLtoS for valid values.
+     * Check the height, width, angle, ratioLtoH, and ratioLtoS for valid values.
      * Throws exception on first found issue.
      *
      * @private
@@ -71,7 +91,7 @@ export declare class Seven {
     private _checkConfig();
     /**
      * This method sets the following values for the object.
-     * _angleRadian, _spacing, _halfSegmentWidth, _height, _width
+     * _segmentLength, _angleRadian, _spacing, _halfSegmentWidth, _height, _width
      *
      * This method populates the _horizontalSegmentGeometry array.
      * The array contains the six points of the horizontal segment's geometry.
@@ -105,7 +125,6 @@ export declare class Seven {
     private _positionSegments();
     private _set(prop, value);
     angle: number;
-    segmentLength: number;
     ratioLtoW: number;
     ratioLtoS: number;
     digit: Digit;

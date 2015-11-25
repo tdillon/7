@@ -1,8 +1,9 @@
 {
   "name": "seven-segment",
-  "description": "A seven segment display geometry library for TypeScript/JavaScript.",
+  "description": "A seven segment display geometry library.",
   "version": "3.0.2",
-  "main": "7.ts",
+  "main": "7.js",
+  "typings": "7.d.ts",
   "author": {
     "name": "Travis Dillon"
   },
@@ -21,6 +22,6 @@
   ],
   "license": "MIT",
   "scripts": {
-    "tsc": "tsc 7.ts -m commonjs -t ES5 -d"
+    "tsc": "tsc -p ./"
   }
 }

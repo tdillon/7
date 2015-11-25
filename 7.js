@@ -52,7 +52,8 @@ var Seven = (function () {
      * If the passed in config contains bad values an exception will be thrown.
      */
     function Seven(_a) {
-        var _b = _a === void 0 ? {} : _a, _c = _b.segmentLength, segmentLength = _c === void 0 ? 50 : _c, _d = _b.angle, angle = _d === void 0 ? 10 : _d, _e = _b.ratioLtoW, ratioLtoW = _e === void 0 ? 4 : _e, _f = _b.ratioLtoS, ratioLtoS = _f === void 0 ? 32 : _f, _g = _b.digit, digit = _g === void 0 ? Digit.BLANK : _g;
+        var _b = _a === void 0 ? {} : _a, height = _b.height, width = _b.width, _c = _b.angle, angle = _c === void 0 ? 10 : _c, _d = _b.ratioLtoW, ratioLtoW = _d === void 0 ? 4 : _d, _e = _b.ratioLtoS, ratioLtoS = _e === void 0 ? 32 : _e, _f = _b.digit, digit = _f === void 0 ? Digit.BLANK : _f;
+        /** The cononical points for a horizontal segment for the given configuration. */
         this._horizontalSegmentGeometry = [
             { x: 0, y: 0 },
             { x: 0, y: 0 },
@@ -61,6 +62,7 @@ var Seven = (function () {
             { x: 0, y: 0 },
             { x: 0, y: 0 }
         ];
+        /** The cononical points for a vertical segment for the given configuration. */
         this._verticalSegmentGeometry = [
             { x: 0, y: 0 },
             { x: 0, y: 0 },
@@ -69,6 +71,7 @@ var Seven = (function () {
             { x: 0, y: 0 },
             { x: 0, y: 0 }
         ];
+        /** The x and y shifts that must be applied to each segment. */
         this._translations = [
             { x: 0, y: 0, a: this._horizontalSegmentGeometry },
             { x: 0, y: 0, a: this._verticalSegmentGeometry },
@@ -78,16 +81,25 @@ var Seven = (function () {
             { x: 0, y: 0, a: this._verticalSegmentGeometry },
             { x: 0, y: 0, a: this._horizontalSegmentGeometry }
         ];
+        /** The segments, A-G of the digit. */
         this.segments = [new Segment(), new Segment(), new Segment(), new Segment(), new Segment(), new Segment(), new Segment()];
         this._angleDegree = angle;
         this.digit = digit;
-        this._segmentLength = segmentLength;
         this._ratioLtoW = ratioLtoW;
         this._ratioLtoS = ratioLtoS;
+        this._height = this._width = 100; //initialize so checkConfig passes, and for default case
+        this._isHeightFixed = true;
+        if (height !== undefined) {
+            this._height = height;
+        }
+        else if (width !== undefined) {
+            this._width = width;
+            this._isHeightFixed = false;
+        } //else - neither specified, default to height=100
         this._positionSegments();
     }
     /**
-     * Check the segmentLength, angle, ratioLtoH, and ratioLtoS for valid values.
+     * Check the height, width, angle, ratioLtoH, and ratioLtoS for valid values.
      * Throws exception on first found issue.
      *
      * @private
@@ -95,19 +107,32 @@ var Seven = (function () {
     Seven.prototype._checkConfig = function () {
         var a;
         var b;
-        //Check segment length
-        a = this._segmentLength;
+        //check height
+        a = this._height;
         b = a * 1; //convert to a number
         if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {
-            throw new TypeError("Invalid value (" + a + ") for segment length, not a number.");
+            throw new TypeError("Invalid value (" + a + ") for height, not a number.");
         }
         else if (b <= 0) {
-            throw new RangeError("Invalid value (" + b + ") for segment length, must be greater than 0.");
+            throw new RangeError("Invalid value (" + b + ") for height, must be greater than 0.");
         }
         else if (!isFinite(b)) {
-            throw new RangeError("Invalid value (" + b + ") for segment length, must be finite.");
+            throw new RangeError("Invalid value (" + b + ") for height, must be finite.");
         }
-        this._segmentLength = b;
+        this._height = b;
+        //check width
+        a = this._width;
+        b = a * 1; //convert to a number
+        if (b != a || (typeof a === 'string' && a.toString().trim() === '')) {
+            throw new TypeError("Invalid value (" + a + ") for width, not a number.");
+        }
+        else if (b <= 0) {
+            throw new RangeError("Invalid value (" + b + ") for width, must be greater than 0.");
+        }
+        else if (!isFinite(b)) {
+            throw new RangeError("Invalid value (" + b + ") for width, must be finite.");
+        }
+        this._width = b;
         //Check angle
         a = this._angleDegree;
         b = a * 1; //convert to a number
@@ -147,7 +172,7 @@ var Seven = (function () {
     };
     /**
      * This method sets the following values for the object.
-     * _angleRadian, _spacing, _halfSegmentWidth, _height, _width
+     * _segmentLength, _angleRadian, _spacing, _halfSegmentWidth, _height, _width
      *
      * This method populates the _horizontalSegmentGeometry array.
      * The array contains the six points of the horizontal segment's geometry.
@@ -172,22 +197,33 @@ var Seven = (function () {
      */
     Seven.prototype._calculateSegmentGeometry = function () {
         this._angleRadian = this._angleDegree * Math.PI / 180;
-        this._spacing = (this.ratioLtoS === 0 ? 0 : this.segmentLength / this.ratioLtoS);
-        var _segmentWidth = this.segmentLength / this.ratioLtoW;
-        this._halfSegmentWidth = _segmentWidth / 2;
         this._segmentEndAngle = (Math.PI / 2 - this._angleRadian) / 2;
+        //These calculations for segmentLength are the same as the height and width calcs below, except solved for segmentLength;
+        if (this._isHeightFixed) {
+            this._segmentLength = this._height / (1 / this._ratioLtoW + 2 * Math.cos(this._angleRadian) + 2 * (Math.sin(this._segmentEndAngle) + Math.cos(this._segmentEndAngle)) / this._ratioLtoS);
+        }
+        else {
+            this._segmentLength = this._width / (2 * Math.sin(Math.abs(this._angleRadian)) + 2 * Math.cos(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) / this._ratioLtoS + 1 + Math.tan(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) / this._ratioLtoW);
+        }
+        this._spacing = this._segmentLength / this.ratioLtoS;
+        var _segmentWidth = this._segmentLength / this.ratioLtoW;
+        this._halfSegmentWidth = _segmentWidth / 2;
         this._segmentHorizontalShiftDistance = this._halfSegmentWidth * Math.tan(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle); //This is the horizontal distance between the left most point in the digit and the nearest point on that same segment.
-        this._height =
-            _segmentWidth +
-                2 * this.segmentLength * Math.cos(this._angleRadian) +
-                2 * this._spacing * (Math.sin(this._segmentEndAngle) + Math.cos(this._segmentEndAngle)); //This is the sum of the vertical distance between the following (1st point of segment A and 1st point of segment F) and (4th point of segment F and 1st point of segment E) and (4th point of segment E and 1st point of segment D).
-        this._width =
-            2 * this.segmentLength * Math.sin(Math.abs(this._angleRadian)) +
-                2 * this._spacing * Math.cos(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) +
-                this.segmentLength +
-                2 * this._segmentHorizontalShiftDistance; //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
+        if (this._isHeightFixed) {
+            this._width =
+                2 * this._segmentLength * Math.sin(Math.abs(this._angleRadian)) +
+                    2 * this._spacing * Math.cos(this._angleDegree >= 0 ? this._segmentEndAngle : Math.PI / 2 - this._segmentEndAngle) +
+                    this._segmentLength +
+                    2 * this._segmentHorizontalShiftDistance; //This is the horizontal distance between the outer most (furthest to the left or furthest to the right) point on the 2 outer most segments and the 1st or 4th (whichever is closest) point on that same segment.
+        }
+        else {
+            this._height =
+                _segmentWidth +
+                    2 * this._segmentLength * Math.cos(this._angleRadian) +
+                    2 * this._spacing * (Math.sin(this._segmentEndAngle) + Math.cos(this._segmentEndAngle)); //This is the sum of the vertical distance between the following (1st point of segment A and 1st point of segment F) and (4th point of segment F and 1st point of segment E) and (4th point of segment E and 1st point of segment D).
+        }
         var h = this._halfSegmentWidth;
-        var l = this.segmentLength;
+        var l = this._segmentLength;
         var t = Math.tan(this._segmentEndAngle); //tangent of the segmentEndAngle, used for several point locations
         this._horizontalSegmentGeometry[1].x = h / t;
         this._horizontalSegmentGeometry[1].y = this._horizontalSegmentGeometry[2].y = -h;
@@ -224,7 +260,7 @@ var Seven = (function () {
     Seven.prototype._positionSegments = function () {
         this._checkConfig();
         this._calculateSegmentGeometry();
-        var l = this.segmentLength;
+        var l = this._segmentLength;
         var aC = this._spacing * Math.cos(this._segmentEndAngle); //Used for horizontal spacing calculations
         var aS = this._spacing * Math.sin(this._segmentEndAngle); //Used for horizontal spacing calculations
         var x = this._translations;
@@ -270,16 +306,6 @@ var Seven = (function () {
         },
         set: function (value) {
             this._set('_angleDegree', value);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Seven.prototype, "segmentLength", {
-        get: function () {
-            return this._segmentLength;
-        },
-        set: function (value) {
-            this._set('_segmentLength', value);
         },
         enumerable: true,
         configurable: true
@@ -330,6 +356,17 @@ var Seven = (function () {
         get: function () {
             return this._height;
         },
+        set: function (value) {
+            var orig = this._isHeightFixed;
+            this._isHeightFixed = true;
+            try {
+                this._set('_height', value);
+            }
+            catch (e) {
+                this._isHeightFixed = orig;
+                throw e;
+            }
+        },
         enumerable: true,
         configurable: true
     });
@@ -337,9 +374,21 @@ var Seven = (function () {
         get: function () {
             return this._width;
         },
+        set: function (value) {
+            var orig = this._isHeightFixed;
+            this._isHeightFixed = false;
+            try {
+                this._set('_width', value);
+            }
+            catch (e) {
+                this._isHeightFixed = orig;
+                throw e;
+            }
+        },
         enumerable: true,
         configurable: true
     });
+    /** Lookup between which segments are used for each digit.  */
     Seven.matrix = [
         //A     B      C      D      E      F      G
         [true, true, true, true, true, true, false],
@@ -358,3 +407,4 @@ var Seven = (function () {
     return Seven;
 })();
 exports.Seven = Seven;
+//# sourceMappingURL=7.js.map

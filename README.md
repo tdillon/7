@@ -5,7 +5,7 @@ Visit http://tdillon.github.io/7/demo.html for a demo of what information this l
 You can use npm, jspm, or directly link the files as you see fit.
 
 ```shell
-npm i seven-segment
+npm i seven-segment --save
 ```
 
 After you have the library, import it.
@@ -28,7 +28,7 @@ You can optionally pass a configuration object to the constructor.  Each propert
 //import Digit if you want access to the enum for setting the digit type.
 import {Seven, Digit} from 'seven-segment/7';
 
-var x = new Seven({segmentLength: 10, angle: 0, ratioLtoW: 2, ratioLtoS: .5, digit: Digit.TWO});
+var x = new Seven({height: 50, angle: 0, ratioLtoW: 2, ratioLtoS: .5, digit: Digit.TWO});
 ```
 
 ### Setters
@@ -36,7 +36,7 @@ You can configure the `Seven` by using setters after the object has been instant
 
 ```javascript
 var x = new Seven();
-x.segmentLength = 20;
+x.height = 20;  //or x.width = 20
 x.angle = -25;
 x.ratioLtoW = 4;
 x.ratioLtoS = 5;
@@ -44,11 +44,11 @@ x.digit = Digit.SIX;
 ```
 
 ### Getters
-Each of the configuration properties as well as `height` and `width` are getters.
+Each of the configuration properties are getters.
 
 ```javascript
 var x = new Seven();
-console.log(x.height, x.width, x.segmentLength, x.angle, x.ratioLtoW, x.ratioLtoS, Digit[x.digit]);
+console.log(x.height, x.width, x.angle, x.ratioLtoW, x.ratioLtoS, Digit[x.digit]);
 ```
 
 ### Exceptions
