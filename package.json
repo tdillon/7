@@ -1,11 +1,10 @@
 {
   "name": "7",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
-    "tsc": "tsc -p javascripts -w",
+    "tsc": "tsc -p ./ -w",
     "start": "live-server",
-    "build": "jspm bundle-sfx javascripts\\app"
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",
@@ -18,17 +17,13 @@
     "url": "https://github.com/tdillon/7/issues"
   },
   "homepage": "https://github.com/tdillon/7#readme",
-  "dependencies": {},
-  "devDependencies": {
-    "jspm": "^0.16.15",
-    "live-server": "^0.8.2",
-    "typescript": "^1.6.2"
+  "dependencies": {
+    "seven-segment": "^4.0.0",
+    "systemjs": "^0.19.6"
   },
-  "description": "",
-  "jspm": {
-    "dependencies": {
-      "seven-segment": "npm:seven-segment@*"
-    },
-    "devDependencies": {}
+  "devDependencies": {
+    "live-server": "^0.8.2",
+    "systemjs-builder": "^0.14.11",
+    "typescript": "^1.6.2"
   }
 }

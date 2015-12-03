@@ -1,6 +1,6 @@
-import {Seven, Digit} from 'seven-segment/7';
+import {Seven, Digit, Point} from 'seven-segment/7';
 
-let d = new Seven();
+let d:Seven;
 let canvas = <HTMLCanvasElement>document.querySelector('canvas');
 let ctx = canvas.getContext('2d');
 let inputs = document.querySelectorAll('input[type=range]');
@@ -11,8 +11,11 @@ let eleMenu = <HTMLInputElement>document.querySelector('header');
 let eleMenuBtn = <HTMLInputElement>document.querySelector('#btnMenu');
 let eleCode = <HTMLSpanElement>document.querySelector('code span');
 let eleMain = <HTMLElement>document.querySelector('main');
+let eleHeightInput = <HTMLInputElement>document.querySelector('input[data-p=height]');
+let eleHeightSpan = <HTMLInputElement>document.querySelector('span[data-p=height]');
+let eleWidthInput = <HTMLInputElement>document.querySelector('input[data-p=width]');
+let eleWidthSpan = <HTMLInputElement>document.querySelector('span[data-p=width]');
 let intHandle;  //handle to setInterval
-
 
 function code() {
   eleCode.textContent = '{';
@@ -67,6 +70,10 @@ for (let i = 0, inp; inp = inputs[i]; ++i) {
     try {
       d[ele.dataset['p']] = parseFloat(ele.value);
       draw(canvas, ctx, d);
+      eleHeightInput.value = d.height.toString();
+      eleHeightSpan.textContent = d.height.toString();
+      eleWidthInput.value = d.width.toString();
+      eleWidthSpan.textContent = d.width.toString();
     } catch (ex) {
       ele.value = d[ele.dataset['p']];
       console.log(ex.message);

@@ -1,5 +1,5 @@
 var _7_1 = require('seven-segment/7');
-var d = new _7_1.Seven();
+var d;
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
 var inputs = document.querySelectorAll('input[type=range]');
@@ -10,6 +10,10 @@ var eleMenu = document.querySelector('header');
 var eleMenuBtn = document.querySelector('#btnMenu');
 var eleCode = document.querySelector('code span');
 var eleMain = document.querySelector('main');
+var eleHeightInput = document.querySelector('input[data-p=height]');
+var eleHeightSpan = document.querySelector('span[data-p=height]');
+var eleWidthInput = document.querySelector('input[data-p=width]');
+var eleWidthSpan = document.querySelector('span[data-p=width]');
 var intHandle; //handle to setInterval
 function code() {
     eleCode.textContent = '{';
@@ -54,6 +58,10 @@ for (var i = 0, inp = void 0; inp = inputs[i]; ++i) {
         try {
             d[ele.dataset['p']] = parseFloat(ele.value);
             draw(canvas, ctx, d);
+            eleHeightInput.value = d.height.toString();
+            eleHeightSpan.textContent = d.height.toString();
+            eleWidthInput.value = d.width.toString();
+            eleWidthSpan.textContent = d.width.toString();
         }
         catch (ex) {
             ele.value = d[ele.dataset['p']];
@@ -88,4 +96,3 @@ eleMenuBtn.addEventListener('click', function () {
 eleMain.addEventListener('click', function () {
     eleMenu.classList.add('hide');
 });
-//# sourceMappingURL=app.js.map

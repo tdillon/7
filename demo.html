@@ -3,8 +3,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>7 demo</title>
 <style>
-
-
   canvas {
     display: block;
     margin: 0 auto;
@@ -26,7 +24,6 @@
   }
 
   @media all and (orientation: portrait) {
-
     header {
       overflow-y: auto;
       height: 50%;
@@ -34,33 +31,26 @@
       right: 0;
       transform: translateY(0);
     }
-
     header.hide {
       transform: translateY(-100%);
     }
-
     header.hide ~ main {
       top: 0;
     }
-
     main {
       left: 0;
       top: 50%;
     }
-
     #btnMenu {
       top: 50%;
       right: 0;
     }
-
     header.hide ~ #btnMenu {
       top: 0;
     }
-
     footer {
       left: 0;
     }
-
   }
 
   @media all and (orientation: landscape) {
@@ -68,36 +58,28 @@
       width: 50%;
       transform: translateX(0);
     }
-
     header.hide {
       transform: translateX(-100%);
     }
-
     header.hide ~ main {
       left: 0;
     }
-
     main {
       left: 50%;
       top: 0;
     }
-
     footer {
       left: 50%;
     }
-
     #btnMenu {
       top: 0;
     }
-
     header.hide ~ #btnMenu {
       left: 0;
     }
-
     header ~ #btnMenu {
       left: 50%;
     }
-
     header.hide ~ footer {
       left: 0;
     }
@@ -117,7 +99,6 @@
     transition: all ease .5s 0s;
     z-index: 2;
     bottom: 0;
-
   }
 
   #btnMenu {
@@ -144,7 +125,8 @@
     border-top: solid 1px #C7C7C7;
   }
 
-  code, footer {
+  code,
+  footer {
     font-family: consolas, lucida console, bit stream vera sans mono, monospace;
   }
 
@@ -176,8 +158,6 @@
     padding: 8px;
     margin: 0;
   }
-
-
 </style>
 
 <header class=hide>
@@ -185,40 +165,60 @@
     <input type=button value=Reset id=btnReset>
   </section>
   <section>
-    <label>Angle: [<span data-p="angle"></span>]
+    <label>Height: [
+      <span data-p="height"></span>]
+      <input type=range min=1 max=500 step=1 data-p="height" value=50>
+    </label>
+  </section>
+  <section>
+    <label>Width: [
+      <span data-p="width"></span>]
+      <input type=range min=1 max=500 step=1 data-p="width" value=50>
+    </label>
+  </section>
+  <section>
+    <label>Angle: [
+      <span data-p="angle"></span>]
       <input type=range min=-89 max=89 step=1 data-p="angle" value=10>
     </label>
   </section>
   <section>
-    <label>Segment Length: [<span data-p="segmentLength"></span>]
-      <input type=range min=1 max=100 step=1 data-p="segmentLength" value=50></label>
+    <label>Length to Width ratio: [
+      <span data-p="ratioLtoW"></span>]
+      <input type=range min=1 max=10 step=.25 data-p="ratioLtoW" value=4>
+    </label>
   </section>
-  <section><label>Length to Width ratio: [<span data-p="ratioLtoW"></span>]
-    <input type=range min=1 max=10 step=.25 data-p="ratioLtoW" value=4></label>
-  </section>
-  <section><label>Length to Spacing ratio: [<span data-p="ratioLtoS"></span>]
-    <input type=range min=.25 max=32 step=.25 data-p="ratioLtoS" value=32></label>
+  <section>
+    <label>Length to Spacing ratio: [
+      <span data-p="ratioLtoS"></span>]
+      <input type=range min=.25 max=32 step=.25 data-p="ratioLtoS" value=32>
+    </label>
   </section>
   <section>
     <label>Digit:
       <select>
         <option>0
-        <option>1
-        <option>2
-        <option>3
-        <option>4
-        <option>5
-        <option>6
-        <option>7
-        <option>8
-        <option>9
-        <option selected>Blank
+          <option>1
+            <option>2
+              <option>3
+                <option>4
+                  <option>5
+                    <option>6
+                      <option>7
+                        <option>8
+                          <option>9
+                            <option selected>Blank
       </select>
     </label>
-    <label>Animate? <input type=checkbox></label>
+    <label>Animate?
+      <input type=checkbox>
+    </label>
   </section>
   <section>
-    <pre><code>var x = new Digit(<span></span>);</code></pre>
+    <pre>
+      <code>var x = new Digit(
+        <span></span>);</code>
+    </pre>
   </section>
 </header>
 
@@ -231,16 +231,15 @@
   <a href=http://tdillon.github.io/7>7</a>
 </footer>
 
-<!--
-<script src="jspm_packages/system.js"></script>
-<script src=config.js></script>
--->
-<script src=javascripts/bundle.js></script>
-<script>
-  /*System.config({
-    packages: {'javascripts': {defaultExtension: 'js'}},
-    paths: {'npm:*': '../node_modules/*.js'},
-    map: {'seven-segment': 'npm:seven-segment'}
-  });*/
-  //System.import('javascripts/app');
+<script src=bundle.js></script>
+
+<script type="text/javascript">
+  var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+  document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+  try {
+    var pageTracker = _gat._getTracker("UA-17166133-3");
+    pageTracker._trackPageview();
+  } catch (err) {}
 </script>

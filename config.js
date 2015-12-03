@@ -3,10 +3,9 @@ System.config({
   defaultJSExtensions: true,
   transpiler: "none",
   paths: {
-    "npm:*": "jspm_packages/npm/*"
+    "npm:*": "node_modules/*"
   },
-
   map: {
-    "seven-segment": "npm:seven-segment@3.0.2"
+    "seven-segment": "npm:seven-segment"
   }
 });
