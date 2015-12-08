@@ -4,9 +4,7 @@
   "version": "4.1.0",
   "main": "7.js",
   "typings": "7.d.ts",
-  "author": {
-    "name": "Travis Dillon"
-  },
+  "author": { "name": "Travis Dillon" },
   "homepage": "https://github.com/tdillon/7#readme",
   "repository": {
     "type": "git",
