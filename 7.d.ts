@@ -130,4 +130,6 @@ export declare class Seven {
     digit: Digit;
     height: number;
     width: number;
+    isHeightFixed: boolean;
+    isWidthFixed: boolean;
 }

@@ -388,6 +388,26 @@ var Seven = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Seven.prototype, "isHeightFixed", {
+        get: function () {
+            return this._isHeightFixed;
+        },
+        set: function (value) {
+            this._isHeightFixed = !!value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Seven.prototype, "isWidthFixed", {
+        get: function () {
+            return !this.isHeightFixed;
+        },
+        set: function (value) {
+            this._isHeightFixed = !value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /** Lookup between which segments are used for each digit.  */
     Seven.matrix = [
         //A     B      C      D      E      F      G

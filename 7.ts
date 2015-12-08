@@ -444,4 +444,20 @@ export class Seven {
       throw e;
     }
   }
+
+  get isHeightFixed():boolean {
+    return this._isHeightFixed;
+  }
+
+  set isHeightFixed(value:boolean) {
+    this._isHeightFixed = !!value;
+  }
+
+  get isWidthFixed():boolean {
+    return !this.isHeightFixed;
+  }
+
+  set isWidthFixed(value:boolean){
+    this._isHeightFixed = !value;
+  }
 }
