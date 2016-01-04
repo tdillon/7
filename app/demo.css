@@ -1,0 +1,115 @@
+canvas {
+  display: block;
+  margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+body {
+  margin: 0;
+  color: #fff;
+  background: #263238;
+  font-family: sans-serif;
+}
+@media all and (orientation: portrait) {
+  header {
+    overflow-y: auto;
+    height: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(0);
+  }
+  header.bootstrapStinks {
+    transform: translateY(-100%);
+  }
+  header.bootstrapStinks ~ main {
+    top: 0;
+  }
+  main {
+    left: 0;
+    top: 50%;
+  }
+  #btnMenu {
+    top: 50%;
+    right: 0;
+  }
+  header.bootstrapStinks ~ #btnMenu {
+    top: 0;
+  }
+  footer {
+    left: 0;
+  }
+}
+@media all and (orientation: landscape) {
+  header {
+    width: 50%;
+    transform: translateX(0);
+  }
+  header.bootstrapStinks {
+    transform: translateX(-100%);
+  }
+  header.bootstrapStinks ~ main {
+    left: 0;
+  }
+  main {
+    left: 50%;
+    top: 0;
+  }
+  footer {
+    left: 50%;
+  }
+  #btnMenu {
+    top: 0;
+  }
+  header.bootstrapStinks ~ #btnMenu {
+    left: 0;
+  }
+  header ~ #btnMenu {
+    left: 50%;
+  }
+  header.bootstrapStinks ~ footer {
+    left: 0;
+  }
+}
+header {
+  z-index: 3;
+  transition: transform .5s ease;
+  color: #000;
+  background: #DFDFDF;
+  position: absolute;
+  padding:16px;
+}
+main {
+  position: fixed;
+  right: 0;
+  transition: all ease .5s 0s;
+  z-index: 2;
+  bottom: 0;
+}
+#btnMenu {
+  position: fixed;
+  transition: all ease .5s;
+  height: 48px;
+  width: 48px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1em;
+  z-index: 3;
+}
+code, footer {
+  font-family: consolas, lucida console, bit stream vera sans mono, monospace;
+}
+footer {
+  z-index: 4;
+  transition: left ease .5s 0s;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  text-align: center;
+}
+footer a {
+  text-decoration: none;
+  color: rgba(255, 255, 255, .1);
+}

@@ -2,9 +2,10 @@
   "name": "7",
   "version": "1.0.0",
   "scripts": {
-    "tsc": "tsc -p ./ -w",
-    "start": "live-server",
-    "build": "node build.js"
+    "start": "lite-server",
+    "clean": "npm run gulp clean",
+    "gulp": "node_modules\\.bin\\gulp",
+    "build": "npm run gulp"
   },
   "repository": {
     "type": "git",
@@ -18,12 +19,20 @@
   },
   "homepage": "https://github.com/tdillon/7#readme",
   "dependencies": {
+    "angular2": "2.0.0-beta.0",
+    "bootstrap": "^3.3.6",
+    "es6-promise": "^3.0.2",
+    "es6-shim": "^0.33.3",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "5.0.0-beta.0",
     "seven-segment": "^4.0.0",
-    "systemjs": "^0.19.6"
+    "systemjs": "0.19.6",
+    "zone.js": "0.5.10"
   },
   "devDependencies": {
-    "live-server": "^0.8.2",
-    "systemjs-builder": "^0.14.11",
-    "typescript": "^1.6.2"
+    "del": "^2.2.0",
+    "gulp": "^3.9.0",
+    "gulp-useref": "^3.0.4",
+    "lite-server": "^1.3.1"
   }
 }

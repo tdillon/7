@@ -3,12 +3,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>7 demo</title>
 
-<link rel="stylesheet" href="stylesheets/demo.css">
+<!-- build:css stylesheets/demo.css -->
+<link rel=stylesheet href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+<link rel=stylesheet href="demo.css">
+<!-- endbuild -->
 
 <seven-segment-demo></seven-segment-demo>
 
 <!-- 1. Load libraries -->
-<script src="src/angular.bundle.js"></script>
+<!-- build:js src/angular.bundle.js -->
+<script src="../node_modules/angular2/bundles/angular2-polyfills.min.js"></script>
+<script src="../node_modules/systemjs/dist/system.js"></script>
+<script src="../node_modules/rxjs/bundles/Rx.min.js"></script>
+<script src="../node_modules/angular2/bundles/angular2.min.js"></script>
+<!-- endbuild -->
 <!-- 2. Configure SystemJS -->
 <script>
   System.config({

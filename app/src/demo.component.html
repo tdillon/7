@@ -1,0 +1,61 @@
+<header [class.bootstrapStinks]="hideMenu">
+  <div class="form-group">
+    <input type=button value=Reset (click)="reset()" class="btn btn-default">
+  </div>
+  <div class="form-group">
+    <label>Angle: [{{d.angle}}]</label>
+    <input type=range min=-89 max=89 step=1 #angle [value]=d.angle (input)="draw(d.angle = angle.value)" class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Length to Width ratio: [{{d.ratioLtoW}}]</label>
+    <input type=range min=1 max=10 step=0.25 #ratioLtoW [value]=d.ratioLtoW (input)="draw(d.ratioLtoW = ratioLtoW.value)" class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Length to Spacing ratio: [{{d.ratioLtoS}}]</label>
+    <input type=range min=0.25 max=32 step=0.25 value=32 #ratioLtoS [value]=d.ratioLtoS (input)="draw(d.ratioLtoS = ratioLtoS.value)" class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Height: [{{d.height}}]</label>
+    <input type=range min=1 max=500 step=1 value=50 #height [value]=d.height (input)="draw(d.height = height.value)" class="form-control">
+  </div>
+  <div class="form-group">
+    <label>Width: [{{d.width}}]</label>
+    <input type=range min=1 max=500 step=1 value=50 #width [value]=d.width (input)="draw(d.width = width.value)" class="form-control">
+  </div>
+  <div class="form-group">
+    <div class="radio">
+      <label>
+        <input type=radio [checked]=d.isHeightFixed (change)="d.isHeightFixed = true" name=fixed> Fix Height Dimension
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type=radio [checked]=d.isWidthFixed (change)="d.isWidthFixed = true" name=fixed> Fix Width Dimension
+      </label>
+    </div>
+  </div>
+  <div>
+    <label>Digit:
+      <select required [value]=d.digit #foo (input)="draw(d.digit = foo.value)" class="form-control">
+        <option *ngFor="#d of digits" [value]="d">{{bar(d)}}</option>
+      </select>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type=checkbox [checked]=count #counter (change)="animate(count = counter.checked)"> Cycle?
+    </label>
+  </div>
+  <div>
+    <pre><code>{{code}}</code></pre>
+  </div>
+</header>
+
+<input type=button value="&#8801;" id=btnMenu (click)="hide()">
+
+<main (click)="hide()">
+  <canvas></canvas>
+</main>
+<footer>
+  <a href="http://tdillon.github.io/7">7</a>
+</footer>
