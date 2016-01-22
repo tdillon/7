@@ -4,36 +4,22 @@
 <title>7 demo</title>
 
 <!-- build:css stylesheets/demo.css -->
-<link rel=stylesheet href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+<link rel=stylesheet href="../jspm_packages/github/twbs/bootstrap@3.3.6/css/bootstrap.min.css">
 <link rel=stylesheet href="demo.css">
 <!-- endbuild -->
 
 <seven-segment-demo></seven-segment-demo>
 
-<!-- 1. Load libraries -->
-<!-- build:js src/angular.bundle.js -->
-<script src="../node_modules/angular2/bundles/angular2-polyfills.min.js"></script>
-<script src="../node_modules/systemjs/dist/system.js"></script>
-<script src="../node_modules/rxjs/bundles/Rx.min.js"></script>
-<script src="../node_modules/angular2/bundles/angular2.min.js"></script>
-<!-- endbuild -->
-<!-- 2. Configure SystemJS -->
+<!-- build:remove -->
+<script src="../jspm_packages/system.js"></script>
+<script src="config.js"></script>
 <script>
-  System.config({
-    packageConfigPaths: ['../node_modules/*/package.json'],
-    map: {
-      'seven-segment': '../../node_modules/seven-segment'
-    },
-    packages: {
-      src: {
-        format: 'register',
-        defaultExtension: 'js'
-      }
-    }
-  });
-  System.import('src/boot')
-    .then(null, console.error.bind(console));
+  System.import('app/src/boot').then(null, console.error.bind(console));
 </script>
+<!-- endbuild -->
+<!-- build:js src/demo.js -->
+<script src=""></script>
+<!-- endbuild -->
 
 <script type="text/javascript">
   var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

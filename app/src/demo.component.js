@@ -25,13 +25,16 @@ System.register(['seven-segment/7', 'angular2/core'], function(exports_1) {
                     this.hideMenu = false;
                     this.count = true;
                     this.digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+                    this.d = new _7_1.Seven();
+                }
+                SevenSegmentDemoComponent.prototype.bar = function (val) {
+                    return _7_1.Digit[val];
+                };
+                SevenSegmentDemoComponent.prototype.ngAfterViewInit = function () {
                     this.canvas = document.querySelector('canvas');
                     this.ctx = this.canvas.getContext('2d');
                     this.reset();
                     this.animate();
-                }
-                SevenSegmentDemoComponent.prototype.bar = function (val) {
-                    return _7_1.Digit[val];
                 };
                 SevenSegmentDemoComponent.prototype.draw = function () {
                     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

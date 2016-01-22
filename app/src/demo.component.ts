@@ -19,7 +19,9 @@ export class SevenSegmentDemoComponent {
     return Digit[val];
   }
 
-  constructor() {
+  constructor() { this.d = new Seven();}
+
+  ngAfterViewInit() {
     this.canvas = <HTMLCanvasElement>document.querySelector('canvas');
     this.ctx = this.canvas.getContext('2d');
     this.reset();

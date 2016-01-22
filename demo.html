@@ -7,25 +7,8 @@
 
 <seven-segment-demo></seven-segment-demo>
 
-<!-- 1. Load libraries -->
-<script src="src/angular.bundle.js"></script>
-<!-- 2. Configure SystemJS -->
-<script>
-  System.config({
-    packageConfigPaths: ['../node_modules/*/package.json'],
-    map: {
-      'seven-segment': '../../node_modules/seven-segment'
-    },
-    packages: {
-      src: {
-        format: 'register',
-        defaultExtension: 'js'
-      }
-    }
-  });
-  System.import('src/boot')
-    .then(null, console.error.bind(console));
-</script>
+
+<script src="src/demo.js"></script>
 
 <script type="text/javascript">
   var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

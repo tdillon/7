@@ -21,7 +21,7 @@ gulp.task('useref', ['clean'], function() {
 
 gulp.task('copy', ['clean'], function() {
   return gulp
-    .src(['app/src/**/*.js','app/src/**/*.html'])
+    .src(['app/src/**/*.html'])
     .pipe(gulp.dest('src'))
 });
 
