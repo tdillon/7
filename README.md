@@ -3,7 +3,7 @@ Visit http://tdillon.github.io/7/demo.html for a demo of what information this l
 
 ### Installation
 You can use npm, jspm, or directly link the files as you see fit.
-The bundle file (dist/7.bundle.js) may be beneficial to you if you need a System.register version.
+The bundle file (dist/seven-segment.bundle.js) may be beneficial to you if you need a System.register version.
 
 ```shell
 npm i seven-segment --save
@@ -12,7 +12,7 @@ npm i seven-segment --save
 After you have the library, import it.
 
 ```javascript
-import {Seven} from 'seven-segment/7';
+import {Seven} from 'seven-segment';
 ```
 
 ### Basic options
@@ -27,7 +27,7 @@ You can optionally pass a configuration object to the constructor.  Each propert
 
 ```javascript
 //import Digit if you want access to the enum for setting the digit type.
-import {Seven, Digit} from 'seven-segment/7';
+import {Seven, Digit} from 'seven-segment';
 
 var x = new Seven({
   height: 50,
