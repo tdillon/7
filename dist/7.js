@@ -1,3 +1,4 @@
+"use strict";
 (function (Digit) {
     Digit[Digit["ZERO"] = 0] = "ZERO";
     Digit[Digit["ONE"] = 1] = "ONE";
@@ -33,7 +34,7 @@ var Segment = (function () {
         configurable: true
     });
     return Segment;
-})();
+}());
 exports.Segment = Segment;
 /**
  * The Seven class represents the geometry of a seven segment digit.
@@ -425,6 +426,6 @@ var Seven = (function () {
         [false, true, true, true, true, false, true],
     ];
     return Seven;
-})();
+}());
 exports.Seven = Seven;
 //# sourceMappingURL=7.js.map

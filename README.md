@@ -3,6 +3,7 @@ Visit http://tdillon.github.io/7/demo.html for a demo of what information this l
 
 ### Installation
 You can use npm, jspm, or directly link the files as you see fit.
+The bundle file (dist/7.bundle.js) may be beneficial to you if you need a System.register version.
 
 ```shell
 npm i seven-segment --save
@@ -28,7 +29,13 @@ You can optionally pass a configuration object to the constructor.  Each propert
 //import Digit if you want access to the enum for setting the digit type.
 import {Seven, Digit} from 'seven-segment/7';
 
-var x = new Seven({height: 50, angle: 0, ratioLtoW: 2, ratioLtoS: .5, digit: Digit.TWO});
+var x = new Seven({
+  height: 50,
+  angle: 0,
+  ratioLtoW: 2,
+  ratioLtoS: .5,
+  digit: Digit.TWO
+});
 ```
 
 ### Setters
@@ -48,7 +55,14 @@ Each of the configuration properties are getters.
 
 ```javascript
 var x = new Seven();
-console.log(x.height, x.width, x.angle, x.ratioLtoW, x.ratioLtoS, Digit[x.digit]);
+console.log(
+  x.height,
+  x.width,
+  x.angle,
+  x.ratioLtoW,
+  x.ratioLtoS,
+  Digit[x.digit]
+);
 ```
 
 ### Exceptions

@@ -7,6 +7,7 @@
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": false,
-    "declaration": true
+    "declaration": true,
+    "outDir": "dist"
   }
 }
