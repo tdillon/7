@@ -2,8 +2,8 @@
   "name": "seven-segment",
   "description": "A seven segment display geometry library.",
   "version": "4.1.1",
-  "main": "dist/7.js",
-  "typings": "dist/7.d.ts",
+  "main": "dist/seven-segment.js",
+  "typings": "dist/seven-segment.d.ts",
   "author": {
     "name": "Travis Dillon"
   },
@@ -23,7 +23,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "trash dist",
-    "tsc:bundle": "tsc -m system --outFile dist/7.bundle.js --rootDir ./src -t ES5 src/seven-segment/7.ts",
+    "tsc:bundle": "tsc -m system --outFile dist/seven-segment.bundle.js --rootDir ./src -t ES5 src/seven-segment.ts",
     "tsc:project": "tsc -p ./",
     "build": "npm run clean && npm run tsc:project && npm run tsc:bundle"
   },

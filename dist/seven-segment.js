@@ -428,4 +428,4 @@ var Seven = (function () {
     return Seven;
 }());
 exports.Seven = Seven;
-//# sourceMappingURL=7.js.map
+//# sourceMappingURL=seven-segment.js.map
