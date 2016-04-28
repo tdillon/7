@@ -1,7 +1,7 @@
 {
   "name": "seven-segment",
   "description": "A seven segment display geometry library.",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "main": "dist/seven-segment.js",
   "typings": "dist/seven-segment.d.ts",
   "author": {
