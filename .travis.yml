@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  "node"
+deploy:
+  provider: npm
+  email: tdillon25@gmail.com
+  api_key:
+    secure: YjbtnfC5zvxeiidfm27LFlwByCd2PoQnRD8YblL8Fw2MEMLcqTFKopV4o3PTKA/55jAtGXt13H4kwHFVY7Zgn7fiXlIVnBZWPZPhaLPX8EK81Ht4t1RX6z64gxhSswKt28S+ZFtFUcxvHA5HTUoqTBOtohhxZBHzW/W8bKDEXCLEvYDQUxaMNKYJ04Vz175MeSGvgzdQ1ak3s4wz7w7jN3auzMX5V+hYmMpPUQ4OQmLoXJE7d4pqzbravrbb3JoU/Up7b7+90s4HMLo8wmZoV9tr7qyk7dtoTIhRSrNXNE94ckvZl0vAurtbuOlns8rx8GuDAdVS8Donrytqq0nI3VVcQciV4YX+xbLnCQIqHDqgDhndr1oCYUwnW/N/GP1ozOumD/LhKpnZjk5QYQM9ytJiYTJaecUA+T5xLpOHkaI3Q/iSgKOZc/rjWYxJnxXFR6HuXqsyX+V9bft8ZcW5wr9elt6F96eWVTq77socY8/qTMrk3Gf097TDEdfLcbMB1RXhuGEnnyEO2ZThgDyDcq7JtHRDrGisj63cjurOBhweQsvGd3euuXkyPMTvEcehzF8EGp54Y1shr9YxG1cxXSgDDOxGpptzXb0495a3EML/GEG6S30NuCxJCnLSdeuDfjgTYBNluIBC9svd6uWR9lCASiYli22r9H34lOQchyI=
+  on:
+    tags: true
+    repo: tdillon/7
