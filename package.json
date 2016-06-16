@@ -22,13 +22,20 @@
   ],
   "license": "MIT",
   "scripts": {
+    "postinstall": "typings install",
+    "test": " phantomjs test/run-jasmine.js test/unit-tests.html",
     "clean": "trash dist",
+    "tsc": "tsc",
     "tsc:bundle": "tsc -m system --outFile dist/seven-segment.bundle.js --rootDir ./src -t ES5 src/seven-segment.ts",
     "tsc:project": "tsc -p ./",
     "build": "npm run clean && npm run tsc:project && npm run tsc:bundle"
   },
   "devDependencies": {
+    "jasmine-core": "^2.4.1",
+    "phantom-jasmine": "^0.3.0",
+    "systemjs": "^0.19.31",
     "trash-cli": "^1.3.0",
-    "typescript": "^1.8.10"
+    "typescript": "^1.8.10",
+    "typings": "^0.8.1"
   }
 }

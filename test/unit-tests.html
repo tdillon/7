@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>Ng App Unit Tests</title>
+<link rel="stylesheet" href="../node_modules/jasmine-core/lib/jasmine-core/jasmine.css">
+<script src="../node_modules/jasmine-core/lib/jasmine-core/jasmine.js"></script>
+<script src="../node_modules/jasmine-core/lib/jasmine-core/jasmine-html.js"></script>
+<script src="../node_modules/jasmine-core/lib/jasmine-core/boot.js"></script>
+<script src="../node_modules/systemjs/dist/system.src.js"></script>
+<script>
+  System.config({
+    packages: {
+      '../dist': {
+        defaultExtension: 'js'
+      }
+    }
+  });
+
+  System.import('../dist/seven-segment.spec').then(window.onload).catch(console.error.bind(console));
+</script>
